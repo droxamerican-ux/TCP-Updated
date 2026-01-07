@@ -1,3 +1,5 @@
 Server running at http://localhost:8080
 Bot Control Panel: http://localhost:8080/web.html
 Current bot status: Stopped
+Client connected via WebSocket
+Client disconnected

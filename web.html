@@ -1192,7 +1192,7 @@
 
         <script>
         function gotoAccountManager() {
-            window.location.href = url('/accounts');
+            window.location.href = 'accounts.html';
         }
         </script>
 
@@ -1234,11 +1234,16 @@
         // Helper function to prefix URLs with application root
         function url(path) {
             if (!path) return applicationRoot || '/';
-                    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('//')) {
+            if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('//')) {
                 return path;
             }
-            const cleanPath = path.startsWith('/') ? path : '/' + path;
-            return applicationRoot ? (applicationRoot + cleanPath) : cleanPath;
+            // If it's an API call, keep the prefixing logic
+            if (path.startsWith('/api/')) {
+                const cleanPath = path.startsWith('/') ? path : '/' + path;
+                return applicationRoot ? (applicationRoot + cleanPath) : cleanPath;
+            }
+            // For local HTML files, just return the path
+            return path.startsWith('/') ? path.substring(1) : path;
         }
         
         // Initialize socket connection
