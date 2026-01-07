@@ -1,0 +1,3709 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <base href="./">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clan Search - Free Fire Bot</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #a855f7;
+            --secondary-color: #ff8800;
+            --success-color: #a855f7;
+            --warning-color: #ff8800;
+            --danger-color: #ff4444;
+            --dark-bg: #020617;
+            --card-bg: rgba(20, 20, 20, 0.95);
+            --text-dark: #ffffff;
+            --text-light: #888888;
+            --border-radius: 12px;
+            --shadow: 0 8px 32px rgba(168, 85, 247, 0.1), 0 4px 16px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 12px 48px rgba(168, 85, 247, 0.2);
+            --gradient-primary: linear-gradient(135deg, #a855f7 0%, #00cc6e 100%);
+            --gradient-success: linear-gradient(135deg, #a855f7 0%, #00cc6e 100%);
+            --gradient-danger: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            --gradient-warning: linear-gradient(135deg, #ff8800 0%, #cc6600 100%);
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #020617;
+            min-height: 100vh;
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 136, 0, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: 15px;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+            letter-spacing: 1px;
+            position: relative;
+        }
+
+        .header h1::before {
+            content: '🔍';
+            display: inline-block;
+            margin-right: 15px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            font-weight: 400;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 14px 28px;
+            background: var(--card-bg);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(168, 85, 247, 0.2);
+            font-weight: 600;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-btn:hover {
+            background: rgba(168, 85, 247, 0.1);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            background: var(--gradient-primary);
+            color: black;
+            border-color: var(--primary-color);
+        }
+
+        .search-container {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            border: 2px solid rgba(168, 85, 247, 0.15);
+        }
+
+        .search-form {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(168, 85, 247, 0.2);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
+        }
+
+        .search-btn {
+            padding: 15px 30px;
+            background: var(--gradient-primary);
+            color: black;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(168, 85, 247, 0.4);
+        }
+
+        .search-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-container {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            border: 2px solid rgba(168, 85, 247, 0.15);
+            display: none;
+        }
+
+        .result-container.show {
+            display: block;
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .result-data {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .clan-display-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            min-height: 600px;
+        }
+
+        .clan-display-container.no-list {
+            grid-template-columns: 1fr;
+        }
+
+        .clan-list-panel {
+            background: rgba(10, 10, 10, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .clan-tabs {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1.5fr;
+            gap: 15px;
+            margin-bottom: 10px;
+            padding: 10px 15px;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .clan-tab {
+            padding: 0;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .clan-entry {
+            background: rgba(20, 20, 20, 0.6);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1.5fr;
+            gap: 15px;
+            align-items: start;
+        }
+
+        .clan-entry.selected {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .clan-entry-column {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            align-items: flex-start;
+        }
+
+        .clan-entry-info-column {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .clan-entry-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .clan-entry-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .clan-entry-name {
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+
+        .clan-entry-type {
+            display: inline-block;
+            background: #4a90e2;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            width: fit-content;
+            margin-top: 3px;
+        }
+
+        .clan-entry-level {
+            color: #ffd700;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .clan-entry-members {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
+        }
+
+        .clan-entry-approval {
+            color: #ffd700;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .clan-detail-panel {
+            background: rgba(10, 10, 10, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            position: relative;
+        }
+
+        .clan-detail-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .clan-detail-id {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .clan-detail-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .clan-detail-action-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px;
+            transition: color 0.3s ease;
+        }
+
+        .clan-detail-action-btn:hover {
+            color: #ffd700;
+        }
+
+        .clan-card {
+            background: transparent;
+            padding: 0;
+            border: none;
+            box-shadow: none;
+            max-width: 100%;
+            margin: 0;
+            position: relative;
+        }
+
+        .clan-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .clan-id-small {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 10px;
+        }
+
+        .clan-avatar-container {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .clan-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 12px;
+            border: 3px solid #dc2626;
+            object-fit: cover;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .clan-badge {
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--primary-color);
+            background: rgba(0, 0, 0, 0.8);
+            object-fit: cover;
+        }
+
+        .clan-info-header {
+            text-align: center;
+            width: 100%;
+        }
+
+        .clan-name {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .clan-level {
+            display: inline-block;
+            color: #ffd700;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-right: 15px;
+        }
+
+        .clan-points {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #ffd700;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .clan-location {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .clan-roles {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .role-card {
+            background: rgba(20, 20, 20, 0.6);
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            text-align: center;
+        }
+
+        .role-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin: 0 auto 8px;
+            display: block;
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .role-info {
+            text-align: center;
+        }
+
+        .role-title {
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+
+        .role-name {
+            color: #ffd700;
+            font-size: 0.8rem;
+        }
+
+        .section-divider {
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent);
+            height: 2px;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .section-divider::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid #ffd700;
+        }
+
+        .section-title {
+            text-align: center;
+            color: #ffd700;
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .vice-captains-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .vice-captain-card {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 10px;
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .vice-captain-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+        }
+
+        .vice-captain-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid var(--primary-color);
+            object-fit: cover;
+            margin-bottom: 8px;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .vice-captain-name {
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            word-break: break-word;
+        }
+
+        .slogan-section {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            margin-bottom: 25px;
+        }
+
+        .slogan-text {
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .clan-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        /* Clan Members Table */
+        .clan-members-section {
+            margin-top: 30px;
+        }
+
+        .members-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        .members-table thead {
+            background: rgba(168, 85, 247, 0.1);
+        }
+
+        .members-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .members-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(168, 85, 247, 0.1);
+            color: var(--text-dark);
+        }
+
+        .members-table tbody tr:hover {
+            background: rgba(168, 85, 247, 0.05);
+        }
+
+        .members-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .member-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(168, 85, 247, 0.3);
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+
+        .member-name {
+            display: inline-flex;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .member-glory {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .member-glory.zero {
+            color: var(--text-light);
+        }
+
+        .loading-members {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-light);
+        }
+
+        /* Member Info Modal */
+        .member-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            pointer-events: none;
+        }
+
+        .member-modal.show {
+            display: block;
+            pointer-events: all;
+        }
+
+        .member-modal-content {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            max-width: 400px;
+            width: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            border: 2px solid rgba(168, 85, 247, 0.3);
+            position: absolute;
+            pointer-events: all;
+        }
+
+        .member-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(168, 85, 247, 0.2);
+        }
+
+        .member-modal-title {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .member-modal-close {
+            background: var(--gradient-danger);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .member-modal-close:hover {
+            transform: rotate(90deg);
+        }
+
+        .member-info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .member-info-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(168, 85, 247, 0.1);
+        }
+
+        .member-info-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-bottom: 3px;
+            text-transform: uppercase;
+        }
+
+        .member-info-value {
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .member-clothes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .member-clothes-item {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            border: 2px solid rgba(168, 85, 247, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .member-clothes-item:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .member-clothes-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            margin: 0 auto 5px;
+            display: block;
+            object-fit: contain;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .member-clothes-id {
+            font-size: 0.7rem;
+            color: var(--text-light);
+        }
+
+        .members-table tbody tr {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .members-table tbody tr:hover {
+            background: rgba(168, 85, 247, 0.1);
+            transform: translateX(5px);
+        }
+
+        /* Member Modal Styles */
+        .info-card {
+            background: transparent;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .player-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .player-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+            margin: 0 auto 10px;
+            display: block;
+        }
+
+        .player-name {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .player-level {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .info-section {
+            margin-bottom: 15px;
+        }
+
+        .info-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .error-message {
+            background: rgba(255, 68, 68, 0.1);
+            border: 2px solid var(--danger-color);
+            color: var(--danger-color);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .loading-members i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        /* Guild Overview Design (when player is in guild) */
+        .guild-overview-container {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 20px;
+            min-height: calc(100vh - 200px);
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .guild-sidebar {
+            background: rgba(20, 20, 20, 0.9);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .guild-nav-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .guild-nav-item:hover {
+            background: rgba(255, 215, 0, 0.1);
+            color: #ffd700;
+        }
+
+        .guild-nav-item.active {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #000;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .guild-nav-item i {
+            font-size: 1.2rem;
+        }
+
+        .guild-main-panel {
+            background: rgba(20, 20, 20, 0.9);
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .guild-members-panel {
+            background: rgba(20, 20, 20, 0.9);
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            width: 100%;
+        }
+
+        .guild-emblem-large {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 4px solid rgba(255, 215, 0, 0.5);
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .guild-emblem-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .guild-name-large {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ffd700;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .guild-id-display {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .guild-progress-bar {
+            width: 100%;
+            max-width: 500px;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 4px;
+            margin-bottom: 15px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            position: relative;
+        }
+
+        .guild-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ffed4e);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            font-weight: 700;
+            color: #000;
+            font-size: 0.85rem;
+            transition: width 0.5s ease;
+        }
+
+        .guild-level-display {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #ffd700;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            margin-top: 10px;
+            margin-bottom: 30px;
+        }
+
+        .guild-details-section {
+            width: 100%;
+            max-width: 600px;
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .guild-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .guild-stat-item {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .guild-stat-item:hover {
+            border-color: rgba(255, 215, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .guild-stat-icon {
+            font-size: 1.5rem;
+            color: #ffd700;
+            width: 40px;
+            text-align: center;
+        }
+
+        .guild-stat-content {
+            flex: 1;
+        }
+
+        .guild-stat-label {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 5px;
+        }
+
+        .guild-stat-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffd700;
+        }
+
+        .guild-section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffd700;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .guild-leader-section {
+            margin-bottom: 25px;
+        }
+
+        .guild-leader-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .guild-leader-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 215, 0, 0.5);
+        }
+
+        .guild-leader-info {
+            flex: 1;
+        }
+
+        .guild-leader-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+
+        .guild-leader-role {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .guild-vice-captains-section {
+            margin-bottom: 25px;
+        }
+
+        .guild-vice-captains-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+        }
+
+        .guild-vice-captain-item {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .guild-vice-captain-item:hover {
+            border-color: rgba(255, 215, 0, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .guild-vc-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            margin-bottom: 8px;
+        }
+
+        .guild-vc-name {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+            word-break: break-word;
+        }
+
+        .guild-slogan-section,
+        .guild-announcement-section {
+            margin-bottom: 25px;
+        }
+
+        .guild-slogan-text,
+        .guild-announcement-text {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .guild-right-panel {
+            background: rgba(20, 20, 20, 0.9);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+
+        .guild-activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .guild-activity-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ffd700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .guild-weekly-rewards {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .guild-reward-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .guild-reward-points {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffd700;
+        }
+
+        .guild-reward-milestones {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .guild-reward-milestone {
+            text-align: center;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .guild-reward-progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .guild-reward-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ffed4e);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .guild-reward-boxes {
+            display: flex;
+            gap: 10px;
+            justify-content: space-around;
+        }
+
+        .guild-reward-box {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            flex: 1;
+        }
+
+        .guild-reward-box.claimed {
+            border-color: rgba(168, 85, 247, 0.5);
+            background: rgba(168, 85, 247, 0.1);
+        }
+
+        .guild-activity-feed {
+            margin-top: 20px;
+        }
+
+        .guild-activity-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            border-left: 3px solid rgba(255, 215, 0, 0.5);
+        }
+
+        .guild-activity-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .guild-activity-content {
+            flex: 1;
+        }
+
+        .guild-activity-name {
+            font-weight: 700;
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+
+        .guild-activity-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .guild-activity-time {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 1200px) {
+            .guild-overview-container {
+                grid-template-columns: 180px 1fr 300px;
+            }
+        }
+
+        @media (max-width: 968px) {
+            .guild-overview-container {
+                grid-template-columns: 1fr;
+            }
+
+            .guild-sidebar {
+                order: 1;
+            }
+
+            .guild-main-panel {
+                order: 2;
+            }
+
+            .guild-right-panel {
+                order: 3;
+            }
+        }
+
+        .join-guild-btn {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .join-guild-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
+            background: linear-gradient(135deg, #ffed4e, #ffd700);
+        }
+
+        .join-guild-btn:active {
+            transform: translateY(0);
+        }
+
+        .join-guild-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .guild-quit-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .quit-clan-btn {
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+            color: #fff;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 15px rgba(255, 68, 68, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quit-clan-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 68, 68, 0.5);
+            background: linear-gradient(135deg, #ff6666, #ff4444);
+        }
+
+        .quit-clan-btn:active {
+            transform: translateY(0);
+        }
+
+        .quit-clan-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .player-loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(168, 85, 247, 0.3);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: var(--text-light);
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid rgba(168, 85, 247, 0.2);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: #28a745;
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
+
+        .notification.info {
+            background: #17a2b8;
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: var(--card-bg);
+            border: 2px solid rgba(168, 85, 247, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            color: var(--primary-color);
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+
+        .mobile-side-panel {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 280px;
+            height: 100%;
+            background: var(--card-bg);
+            border-right: 2px solid rgba(168, 85, 247, 0.2);
+            z-index: 1000;
+            transition: left 0.3s ease;
+            padding: 20px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .mobile-side-panel.show {
+            left: 0;
+        }
+
+        .mobile-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-nav-btn {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            background: var(--card-bg);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 2px solid rgba(168, 85, 247, 0.2);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .mobile-nav-btn.active {
+            background: var(--gradient-primary);
+            color: black;
+        }
+
+        .mobile-nav-btn.logout {
+            background: var(--gradient-danger);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .nav-buttons {
+                display: none;
+            }
+
+            .container {
+                padding: 15px 10px;
+                padding-top: 70px;
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+
+            .header {
+                margin-bottom: 20px;
+                text-align: center;
+            }
+
+            .header h1 {
+                font-size: clamp(1.8rem, 6vw, 2.5rem);
+                margin-bottom: 20px;
+                line-height: 1.2;
+            }
+
+            .header p {
+                font-size: 1rem;
+                margin-bottom: 0;
+                opacity: 0.9;
+            }
+
+            .search-form {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .search-input,
+            .search-btn {
+                width: 100%;
+                font-size: 16px;
+                /* Prevents zoom on iOS */
+            }
+
+            .search-container {
+                padding: 20px 15px;
+                margin-bottom: 20px;
+            }
+
+            .result-container {
+                padding: 20px 15px;
+                margin-bottom: 20px;
+            }
+
+            .result-title {
+                font-size: 1.2rem;
+                margin-bottom: 15px;
+            }
+
+            .clan-display-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                min-height: auto;
+            }
+
+            .clan-list-panel {
+                margin-bottom: 20px;
+                padding: 15px;
+                overflow-x: auto;
+            }
+
+            .clan-tabs {
+                grid-template-columns: 2fr 1fr 1fr 1.5fr;
+                gap: 10px;
+                padding: 10px;
+                font-size: 0.75rem;
+                min-width: 600px;
+                /* Allow horizontal scroll */
+            }
+
+            .clan-entry {
+                grid-template-columns: 2fr 1fr 1fr 1.5fr;
+                gap: 10px;
+                padding: 12px;
+                min-width: 600px;
+                /* Allow horizontal scroll */
+            }
+
+            .clan-entry-name {
+                font-size: 0.9rem;
+            }
+
+            .clan-entry-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .clan-detail-panel {
+                padding: 15px;
+            }
+
+            .clan-card {
+                padding: 15px;
+            }
+
+            .clan-name {
+                font-size: 1.4rem;
+            }
+
+            .clan-roles {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .member-modal-content {
+                max-width: 95%;
+                width: 95%;
+                max-height: 85vh;
+                padding: 15px;
+            }
+
+            .member-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .member-clothes-grid {
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+                gap: 8px;
+            }
+
+            .member-clothes-image {
+                width: 50px;
+                height: 50px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px 5px;
+                padding-top: 60px;
+            }
+
+            .header h1 {
+                font-size: clamp(1.2rem, 6vw, 1.6rem);
+            }
+
+            .search-container {
+                padding: 15px 10px;
+            }
+
+            .result-container {
+                padding: 15px 10px;
+            }
+
+            .clan-list-panel {
+                padding: 10px;
+            }
+
+            .clan-tabs {
+                font-size: 0.7rem;
+                padding: 8px;
+                min-width: 500px;
+            }
+
+            .clan-entry {
+                padding: 10px;
+                min-width: 500px;
+            }
+
+            .clan-entry-name {
+                font-size: 0.85rem;
+            }
+
+            .clan-entry-icon {
+                width: 35px;
+                height: 35px;
+            }
+
+            .clan-name {
+                font-size: 1.2rem;
+            }
+
+            .member-modal-content {
+                max-width: 98%;
+                width: 98%;
+                padding: 12px;
+            }
+        }
+
+        /* Account Selection Modal */
+        .account-selection-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        }
+
+        .account-selection-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .account-selection-content {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            border: 2px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .account-selection-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .account-selection-header h2 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .account-selection-header p {
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        .account-list {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .account-item {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(168, 85, 247, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .account-item:hover {
+            border-color: var(--primary-color);
+            transform: translateX(5px);
+            background: rgba(168, 85, 247, 0.1);
+        }
+
+        .account-item.selected {
+            border-color: var(--primary-color);
+            background: rgba(168, 85, 247, 0.15);
+        }
+
+        .account-item-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .account-item-uid {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            font-family: 'Courier New', monospace;
+        }
+
+        .account-selection-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .account-selection-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .account-selection-btn-primary {
+            background: var(--gradient-primary);
+            color: black;
+        }
+
+        .account-selection-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(168, 85, 247, 0.4);
+        }
+
+        .account-selection-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .no-accounts-message {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-light);
+        }
+
+        .no-accounts-message a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .no-accounts-message a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Mobile Menu Toggle -->
+    <div class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+
+    <!-- Mobile Side Panel -->
+    <div class="mobile-side-panel" id="mobileSidePanel">
+        <div style="margin-bottom: 30px;">
+            <h3 style="color: var(--primary-color); text-align: center; margin-bottom: 20px;">Menu</h3>
+            <a href="web.html" class="mobile-nav-btn">
+                <i class="fas fa-gamepad"></i> Bot Control
+            </a>
+            <a href="accounts.html" class="mobile-nav-btn">
+                <i class="fas fa-user"></i> Account Management
+            </a>
+            <a href="owner-info.html" class="mobile-nav-btn">
+                <i class="fas fa-info-circle"></i> Owner Information
+            </a>
+            <a href="clan-search.html" class="mobile-nav-btn">
+                <i class="fas fa-search"></i> Clan Search
+            </a>
+            <a href="bot-info.html" class="mobile-nav-btn">
+                <i class="fas fa-robot"></i> Bot Info
+            </a>
+            <a href="friends.html" class="mobile-nav-btn">
+                <i class="fas fa-user-friends"></i> Friends
+            </a>
+            
+            <a href="change-credentials.html" class="mobile-nav-btn">
+                <i class="fas fa-key"></i> Change Credentials
+            </a>
+            <a href="login.html" class="mobile-nav-btn logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+            
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Clan Search</h1>
+            <p>Search for Free Fire clan information by Clan ID</p>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="web.html" class="nav-btn">
+                <i class="fas fa-gamepad"></i> Bot Control
+            </a>
+            <a href="accounts.html" class="nav-btn">
+                <i class="fas fa-user"></i> Account Management
+            </a>
+            <a href="owner-info.html" class="nav-btn">
+                <i class="fas fa-info-circle"></i> Owner Information
+            </a>
+            <a href="clan-search.html" class="nav-btn">
+                <i class="fas fa-search"></i> Clan Search
+            </a>
+            <a href="bot-info.html" class="nav-btn">
+                <i class="fas fa-robot"></i> Bot Info
+            </a>
+            <a href="friends.html" class="nav-btn">
+                <i class="fas fa-user-friends"></i> Friends
+            </a>
+            
+            <a href="change-credentials.html" class="nav-btn">
+                <i class="fas fa-key"></i> Change Credentials
+            </a>
+            <a href="login.html" class="nav-btn"
+                style="background: linear-gradient(135deg, #dc2626, #b91c1c);">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+            
+        </div>
+
+        <div class="search-container">
+            <form class="search-form" onsubmit="searchClan(event)">
+                <input type="text" class="search-input" id="clanIdInput" placeholder="Enter Clan ID (e.g., 3084620050)"
+                    required>
+                <button type="submit" class="search-btn" id="searchBtn">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </form>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <div>Searching clan information...</div>
+            </div>
+        </div>
+
+        <div class="result-container" id="resultContainer">
+            <div class="result-data" id="resultData"></div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <!-- Member Info Modal -->
+    <div class="member-modal" id="memberModal">
+        <div class="member-modal-content">
+            <div class="member-modal-header">
+                <div class="member-modal-title" id="memberModalTitle">Member Info</div>
+                <button class="member-modal-close" onclick="closeMemberModal()">&times;</button>
+            </div>
+            <div id="memberModalBody">
+                <div class="loading-members">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <div>Loading member information...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get application root for URL prefixing
+        const applicationRoot = '/vqgay4p4g9';
+
+        // Helper function to prefix URLs with application root
+        function url(path) {
+            if (!path) return applicationRoot || '/';
+            if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('//')) {
+                return path; // External URLs, don't modify
+            }
+            const cleanPath = path.startsWith('/') ? path : '/' + path;
+            return applicationRoot ? (applicationRoot + cleanPath) : cleanPath;
+        }
+
+
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        async function searchClan(event) {
+            event.preventDefault();
+
+            const clanId = document.getElementById('clanIdInput').value.trim();
+            const loading = document.getElementById('loading');
+            const resultContainer = document.getElementById('resultContainer');
+            const resultData = document.getElementById('resultData');
+            const searchBtn = document.getElementById('searchBtn');
+            const container = document.querySelector('.clan-display-container');
+            const clanListPanel = document.querySelector('.clan-list-panel');
+
+            if (!clanId) {
+                showNotification('Please enter a Clan ID', 'error');
+                return;
+            }
+
+            // Make sure clan list panel is visible for search results
+            if (clanListPanel) {
+                clanListPanel.style.display = 'block';
+            }
+            if (container) {
+                container.classList.remove('no-list');
+            }
+
+            // Disable button and show loading
+            searchBtn.disabled = true;
+            loading.classList.add('show');
+            resultContainer.classList.remove('show');
+
+            try {
+                const response = await fetch(url('/api/clan-search'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        clan_id: clanId
+                    })
+                });
+
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    console.error('Non-JSON response:', text.substring(0, 200));
+                    showNotification('Error: Server returned invalid response. Status: ' + response.status, 'error');
+                    loading.classList.remove('show');
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (response.status === 401) {
+                    showNotification('Authentication required. Please login again.', 'error');
+                    setTimeout(() => {
+                        window.location.href = url('/login');
+                    }, 2000);
+                    return;
+                }
+
+                if (response.ok && data.success) {
+                    // Replace clan list with only the searched clan (hide random clans)
+                    clanList = [data.data];
+                    displayClanList(clanList);
+
+                    // Show result container
+                    if (resultContainer) {
+                        resultContainer.classList.add('show');
+                    }
+
+                    // Select the searched clan
+                    selectClan(data.data.clan_id);
+                    showNotification('Clan information retrieved successfully!', 'success');
+                } else {
+                    showNotification(data.message || 'Error searching clan', 'error');
+                }
+            } catch (error) {
+                showNotification('Network error: ' + error.message, 'error');
+                resultContainer.classList.remove('show');
+            } finally {
+                loading.classList.remove('show');
+                searchBtn.disabled = false;
+            }
+        }
+
+        function toggleMobileMenu() {
+            const overlay = document.getElementById('mobileOverlay');
+            const panel = document.getElementById('mobileSidePanel');
+
+            overlay.classList.toggle('show');
+            panel.classList.toggle('show');
+        }
+
+        function closeMobileMenu() {
+            const overlay = document.getElementById('mobileOverlay');
+            const panel = document.getElementById('mobileSidePanel');
+
+            overlay.classList.remove('show');
+            panel.classList.remove('show');
+        }
+
+        // Format guild overview (when player is in guild) - matches image design
+        async function formatGuildOverview(data) {
+            const defaultAvatar = 902000092;
+            const clanId = data.clan_id || data.clanId || data.id || '';
+            const clanName = data.clan_name || 'Unknown Guild';
+            const clanLevel = data.clan_level || 0;
+            const memberNum = data.member_num || 0;
+            const capacity = data.capacity || 0;
+
+            // Calculate progress (using honor_point or last_modify_announce_at)
+            const currentPoints = parseInt(data.honor_point || data.last_modify_announce_at || 0);
+            const nextLevelPoints = currentPoints + 50000; // Example calculation
+            const progressPercent = Math.min(100, (currentPoints / nextLevelPoints) * 100);
+
+            // Weekly activity points (using total_activeness sum or estimate)
+            const weeklyActivity = currentPoints; // Placeholder - would need to sum member activities
+            const weeklyProgress = Math.min(100, (weeklyActivity / 35000) * 100);
+
+            let html = '<div class="guild-overview-container">';
+
+            // Left Sidebar - Navigation
+            html += '<div class="guild-sidebar">';
+            html += '<div class="guild-nav-item active" id="nav-overview-' + clanId + '" onclick="showGuildOverview(\'' + clanId + '\')">';
+            html += '<i class="fas fa-home"></i>';
+            html += '<span>OVERVIEW</span>';
+            html += '</div>';
+            html += '<div class="guild-nav-item" id="nav-members-' + clanId + '" onclick="showGuildMembers(\'' + clanId + '\')">';
+            html += '<i class="fas fa-users"></i>';
+            html += '<span>MEMBERS</span>';
+            html += '</div>';
+            html += '<div class="guild-nav-item">';
+            html += '<i class="fas fa-trophy"></i>';
+            html += '<span>ACTIVITY REWARDS</span>';
+            html += '</div>';
+            html += '<div class="guild-nav-item" style="opacity: 0.5;">';
+            html += '<i class="fas fa-swords"></i>';
+            html += '<span>BR GUILD WARS</span>';
+            html += '<div style="font-size: 0.7rem; margin-top: 5px; color: rgba(255,255,255,0.5);">COMING SOON</div>';
+            html += '</div>';
+            html += '</div>'; // End sidebar
+
+            // Main Panel - Guild Emblem and Info (Overview)
+            html += '<div class="guild-main-panel" id="guild-overview-panel-' + clanId + '">';
+            html += '<div class="guild-emblem-large">';
+            html += `<img src="https://ffitem.droxx64.store/?get=${defaultAvatar}.png" alt="Guild Emblem" id="guild-emblem-main" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'%3E%3Crect fill=\'%23000\' width=\'200\' height=\'200\'/%3E%3C/svg%3E'">`;
+            html += '</div>';
+            html += '<div class="guild-name-large">' + escapeHtml(clanName) + '</div>';
+            html += '<div class="guild-id-display">';
+            html += '<span>GUILD ID ' + clanId + '</span>';
+            html += '<i class="fas fa-copy" style="cursor: pointer;" onclick="copyToClipboard(\'' + clanId + '\')"></i>';
+            html += '</div>';
+
+            // Progress Bar
+            html += '<div class="guild-progress-bar">';
+            html += '<div class="guild-progress-fill" style="width: ' + progressPercent + '%;">';
+            html += '<i class="fas fa-crown" style="margin-right: 5px;"></i>';
+            html += currentPoints.toLocaleString() + '/' + nextLevelPoints.toLocaleString();
+            html += '</div>';
+            html += '</div>';
+
+            // Level Display
+            html += '<div class="guild-level-display">Lv. ' + clanLevel + '</div>';
+
+            // Additional Guild Details Section
+            html += '<div class="guild-details-section">';
+
+            // Guild Stats Grid
+            html += '<div class="guild-stats-grid">';
+
+            // Members Count
+            html += '<div class="guild-stat-item">';
+            html += '<div class="guild-stat-icon"><i class="fas fa-users"></i></div>';
+            html += '<div class="guild-stat-content">';
+            html += '<div class="guild-stat-label">Members</div>';
+            html += '<div class="guild-stat-value">' + memberNum + '/' + capacity + '</div>';
+            html += '</div>';
+            html += '</div>';
+
+            // Region
+            html += '<div class="guild-stat-item">';
+            html += '<div class="guild-stat-icon"><i class="fas fa-map-marker-alt"></i></div>';
+            html += '<div class="guild-stat-content">';
+            html += '<div class="guild-stat-label">Region</div>';
+            html += '<div class="guild-stat-value">' + escapeHtml(getRegionName(data.region || 'BD')) + '</div>';
+            html += '</div>';
+            html += '</div>';
+
+            // Entry Type
+            html += '<div class="guild-stat-item">';
+            html += '<div class="guild-stat-icon"><i class="fas fa-sign-in-alt"></i></div>';
+            html += '<div class="guild-stat-content">';
+            html += '<div class="guild-stat-label">Entry Type</div>';
+            html += '<div class="guild-stat-value">' + escapeHtml(getEntryType(data.entry_type)) + '</div>';
+            html += '</div>';
+            html += '</div>';
+
+            // Total Glory
+            const totalGlory = (data.last_modify_announce_at !== undefined && data.last_modify_announce_at !== null && data.last_modify_announce_at !== '')
+                ? data.last_modify_announce_at
+                : (data.honor_point !== undefined && data.honor_point !== null && data.honor_point !== '')
+                    ? data.honor_point
+                    : '0';
+            html += '<div class="guild-stat-item">';
+            html += '<div class="guild-stat-icon"><i class="fas fa-crown"></i></div>';
+            html += '<div class="guild-stat-content">';
+            html += '<div class="guild-stat-label">Total Glory</div>';
+            html += '<div class="guild-stat-value">' + parseInt(totalGlory).toLocaleString() + '</div>';
+            html += '</div>';
+            html += '</div>';
+
+            // Created Date
+            if (data.create_at) {
+                const createdDate = new Date(parseInt(data.create_at) * 1000);
+                html += '<div class="guild-stat-item">';
+                html += '<div class="guild-stat-icon"><i class="fas fa-calendar"></i></div>';
+                html += '<div class="guild-stat-content">';
+                html += '<div class="guild-stat-label">Created</div>';
+                html += '<div class="guild-stat-value" style="font-size: 0.85rem;">' + createdDate.toLocaleDateString() + '</div>';
+                html += '</div>';
+                html += '</div>';
+            }
+
+            // Certification Status
+            if (data.is_certification !== undefined) {
+                html += '<div class="guild-stat-item">';
+                html += '<div class="guild-stat-icon"><i class="fas fa-certificate"></i></div>';
+                html += '<div class="guild-stat-content">';
+                html += '<div class="guild-stat-label">Certification</div>';
+                html += '<div class="guild-stat-value">' + (data.is_certification ? 'Yes' : 'No') + '</div>';
+                html += '</div>';
+                html += '</div>';
+            }
+
+            html += '</div>'; // End stats grid
+
+            // Guild Leader Section
+            html += '<div class="guild-leader-section">';
+            html += '<div class="guild-section-title">Guild Leader</div>';
+            html += '<div class="guild-leader-card">';
+            html += '<img src="https://ffitem.droxx64.store/?get=' + defaultAvatar + '.png" alt="Leader" class="guild-leader-avatar" id="guild-leader-avatar-' + clanId + '" onerror="this.style.display=\'none\'">';
+            html += '<div class="guild-leader-info">';
+            html += '<div class="guild-leader-name" id="guild-leader-name-' + clanId + '">' + escapeHtml(data.captain_id || 'Unknown') + '</div>';
+            html += '<div class="guild-leader-role">Captain</div>';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+
+            // Vice Captains Section
+            if (data.vice_captains && data.vice_captains.length > 0) {
+                html += '<div class="guild-vice-captains-section">';
+                html += '<div class="guild-section-title">Vice Captains (' + data.vice_captains.length + ')</div>';
+                html += '<div class="guild-vice-captains-grid">';
+                for (let i = 0; i < data.vice_captains.length; i++) {
+                    const vcUid = data.vice_captains[i];
+                    html += '<div class="guild-vice-captain-item" data-vc-uid="' + vcUid + '" id="guild-vc-' + clanId + '-' + i + '">';
+                    html += '<img src="https://ffitem.droxx64.store/?get=' + defaultAvatar + '.png" alt="Vice Captain" class="guild-vc-avatar" onerror="this.style.display=\'none\'">';
+                    html += '<div class="guild-vc-name">' + escapeHtml(vcUid) + '</div>';
+                    html += '</div>';
+                }
+                html += '</div>';
+                html += '</div>';
+            }
+
+            // Slogan Section
+            if (data.slogan) {
+                html += '<div class="guild-slogan-section">';
+                html += '<div class="guild-section-title">Slogan</div>';
+                html += '<div class="guild-slogan-text">' + escapeHtml(data.slogan) + '</div>';
+                html += '</div>';
+            }
+
+            // Announcement Section
+            if (data.announcement) {
+                html += '<div class="guild-announcement-section">';
+                html += '<div class="guild-section-title">Announcement</div>';
+                html += '<div class="guild-announcement-text">' + escapeHtml(data.announcement).replace(/
+/g, '<br>') + '</div>';
+                html += '</div>';
+            }
+
+            // Quit Clan Button Section
+            html += '<div class="guild-quit-section">';
+            html += '<button class="quit-clan-btn" id="quit-clan-btn-' + clanId + '" onclick="quitClan(\'' + clanId + '\')">';
+            html += '<i class="fas fa-sign-out-alt"></i>';
+            html += '<span>Quit Guild</span>';
+            html += '</button>';
+            html += '</div>';
+
+            html += '</div>'; // End guild details section
+            html += '</div>'; // End main panel (overview)
+
+            // Members Panel (hidden by default)
+            html += '<div class="guild-members-panel" id="guild-members-panel-' + clanId + '" style="display: none;">';
+            html += '<div class="loading-members">';
+            html += '<i class="fas fa-spinner fa-spin"></i>';
+            html += '<div>Loading members...</div>';
+            html += '</div>';
+            html += '</div>'; // End members panel
+
+            html += '</div>'; // End overview container
+
+            return html;
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Guild ID copied to clipboard!', 'success');
+            });
+        }
+
+        function showGuildOverview(clanId) {
+            // Hide members panel, show overview panel
+            const overviewPanel = document.getElementById('guild-overview-panel-' + clanId);
+            const membersPanel = document.getElementById('guild-members-panel-' + clanId);
+            const navOverview = document.getElementById('nav-overview-' + clanId);
+            const navMembers = document.getElementById('nav-members-' + clanId);
+
+            if (overviewPanel) overviewPanel.style.display = 'flex';
+            if (membersPanel) membersPanel.style.display = 'none';
+
+            // Update nav active state
+            if (navOverview) navOverview.classList.add('active');
+            if (navMembers) navMembers.classList.remove('active');
+        }
+
+        function showGuildMembers(clanId) {
+            // Hide overview panel, show members panel
+            const overviewPanel = document.getElementById('guild-overview-panel-' + clanId);
+            const membersPanel = document.getElementById('guild-members-panel-' + clanId);
+            const navOverview = document.getElementById('nav-overview-' + clanId);
+            const navMembers = document.getElementById('nav-members-' + clanId);
+
+            if (overviewPanel) overviewPanel.style.display = 'none';
+            if (membersPanel) {
+                membersPanel.style.display = 'block';
+                // Load members if not already loaded
+                const membersContent = membersPanel.querySelector('.loading-members');
+                if (membersContent && membersContent.textContent.includes('Loading')) {
+                    loadClanMembers(clanId);
+                }
+            }
+
+            // Update nav active state
+            if (navOverview) navOverview.classList.remove('active');
+            if (navMembers) navMembers.classList.add('active');
+        }
+
+        // Format clan data for display (basic version - shows immediately)
+        // Returns only the right panel HTML
+        async function formatClanDataBasic(data) {
+            // Use default avatars first, will be updated later
+            const defaultAvatar = 902000092;
+
+            let html = '<div class="clan-card">';
+
+            // Header with Avatar and Info
+            html += '<div class="clan-header">';
+            html += '<div class="clan-avatar-container">';
+            html += `<img src="https://ffitem.droxx64.store/?get=${defaultAvatar}.png" alt="Clan Avatar" class="clan-avatar" id="clan-avatar-main" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23000\' width=\'100\' height=\'100\'/%3E%3C/svg%3E'">`;
+            html += '<span id="clan-badge-container"></span>';
+            html += '</div>';
+
+            html += '<div class="clan-info-header">';
+            html += `<div class="clan-name">${escapeHtml(data.clan_name || 'Unknown Clan')}</div>`;
+            html += `<div class="clan-level">LV.${data.clan_level || 0}</div>`;
+            const totalGlory = (data.last_modify_announce_at !== undefined && data.last_modify_announce_at !== null && data.last_modify_announce_at !== '')
+                ? data.last_modify_announce_at
+                : (data.honor_point !== undefined && data.honor_point !== null && data.honor_point !== '')
+                    ? data.honor_point
+                    : '0';
+            html += `<div class="clan-points"><i class="fas fa-crown"></i> ${totalGlory}</div>`;
+            html += `<div class="clan-location"><i class="fas fa-map-marker-alt"></i> ${getRegionName(data.region || 'BD')}</div>`;
+            html += '</div>';
+            html += '</div>'; // End header
+
+            // Roles Section
+            html += '<div class="clan-roles">';
+
+            // Guild Leader
+            html += '<div class="role-card">';
+            html += `<img src="https://ffitem.droxx64.store/?get=${defaultAvatar}.png" alt="Leader" class="role-icon" id="leader-avatar" onerror="this.style.display='none'">`;
+            html += '<div class="role-info">';
+            html += '<div class="role-title">GUILD LEADER</div>';
+            html += `<div class="role-name" id="leader-name">${data.captain_id || 'Unknown'}</div>`;
+            html += '</div>';
+            html += '</div>';
+
+            // Guild Honor
+            html += '<div class="role-card">';
+            html += '<div class="role-icon" style="background: linear-gradient(135deg, #ffd700, #ffed4e); display: flex; align-items: center; justify-content: center;"><i class="fas fa-shield-alt" style="color: #000; font-size: 1.5rem;"></i></div>';
+            html += '<div class="role-info">';
+            html += '<div class="role-title">TOTAL GLORY</div>';
+            html += `<div class="role-name">${totalGlory}</div>`;
+            html += '</div>';
+            html += '</div>';
+
+            html += '</div>'; // End roles
+
+            // Vice Captains Section
+            if (data.vice_captains && data.vice_captains.length > 0) {
+                html += '<div class="section-divider"></div>';
+                html += '<div class="section-title">Vice Captains</div>';
+                html += '<div class="vice-captains-grid" id="vice-captains-grid">';
+
+                for (let i = 0; i < data.vice_captains.length; i++) {
+                    const vcUid = data.vice_captains[i];
+                    html += '<div class="vice-captain-card" data-vc-index="' + i + '" data-vc-uid="' + vcUid + '">';
+                    html += `<img src="https://ffitem.droxx64.store/?get=${defaultAvatar}.png" alt="Vice Captain" class="vice-captain-avatar" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\'%3E%3Crect fill=\'%23000\' width=\'60\' height=\'60\'/%3E%3C/svg%3E'">`;
+                    html += `<div class="vice-captain-name">${vcUid}</div>`;
+                    html += '</div>';
+                }
+
+                html += '</div>';
+            }
+
+            // Slogan Section
+            if (data.slogan) {
+                html += '<div class="section-divider"></div>';
+                html += '<div class="section-title">Slogan</div>';
+                html += '<div class="slogan-section">';
+                html += `<div class="slogan-text">${escapeHtml(data.slogan)}</div>`;
+                html += '</div>';
+            }
+
+            // Announcement Section
+            if (data.announcement) {
+                html += '<div class="section-divider"></div>';
+                html += '<div class="section-title">Announcement</div>';
+                html += '<div class="slogan-section">';
+                const announcementText = escapeHtml(data.announcement).replace(/
+/g, '
+');
+                html += `<div class="slogan-text">${announcementText}</div>`;
+                html += '</div>';
+            }
+
+            // Additional Stats Section
+            html += '<div class="section-divider"></div>';
+            html += '<div class="section-title">Clan Statistics</div>';
+            html += '<div class="clan-stats">';
+            html += '<div class="stat-item">';
+            html += '<div class="stat-label">Members</div>';
+            html += `<div class="stat-value">${data.member_num || 0}/${data.capacity || 0}</div>`;
+            html += '</div>';
+            html += '<div class="stat-item">';
+            html += '<div class="stat-label">Capacity</div>';
+            html += `<div class="stat-value">${data.capacity || 0}</div>`;
+            html += '</div>';
+            html += '<div class="stat-item">';
+            html += '<div class="stat-label">Entry Type</div>';
+            html += `<div class="stat-value">${getEntryType(data.entry_type)}</div>`;
+            html += '</div>';
+            if (data.entry_level !== undefined) {
+                html += '<div class="stat-item">';
+                html += '<div class="stat-label">Entry Level</div>';
+                html += `<div class="stat-value">${data.entry_level}</div>`;
+                html += '</div>';
+            }
+            if (data.entry_rank !== undefined) {
+                html += '<div class="stat-item">';
+                html += '<div class="stat-label">Entry Rank</div>';
+                html += `<div class="stat-value">${data.entry_rank}</div>`;
+                html += '</div>';
+            }
+            if (data.race_point !== undefined) {
+                html += '<div class="stat-item">';
+                html += '<div class="stat-label">Race Points</div>';
+                html += `<div class="stat-value">${data.race_point}</div>`;
+                html += '</div>';
+            }
+            if (data.create_at) {
+                html += '<div class="stat-item">';
+                html += '<div class="stat-label">Created At</div>';
+                html += `<div class="stat-value" style="font-size: 0.85rem;">${new Date(parseInt(data.create_at) * 1000).toLocaleDateString()}</div>`;
+                html += '</div>';
+            }
+            html += '</div>';
+
+            // Join Guild Button
+            html += '<div class="section-divider"></div>';
+            html += '<div style="text-align: center; margin-top: 20px;">';
+            html += `<button class="join-guild-btn" onclick="joinGuild('${data.clan_id}')" id="join-guild-btn-${data.clan_id}">`;
+            html += '<i class="fas fa-sign-in-alt"></i> JOIN GUILD';
+            html += '</button>';
+            html += '</div>';
+
+            // Don't show members section in clan search - only show clan details
+
+            html += '</div>'; // End clan-card
+
+            return html;
+        }
+
+        // Load player info in batches and update UI progressively with parallel batches
+        async function loadPlayerInfoAndUpdate(clanData) {
+            const BATCH_SIZE = 10; // Process 10 players at a time
+            const PARALLEL_BATCHES = 3; // Run 3 batches simultaneously
+            const allUids = [clanData.captain_id];
+            if (clanData.vice_captains && clanData.vice_captains.length > 0) {
+                allUids.push(...clanData.vice_captains);
+            }
+
+            // Create all batches
+            const batches = [];
+            for (let i = 0; i < allUids.length; i += BATCH_SIZE) {
+                batches.push(allUids.slice(i, i + BATCH_SIZE));
+            }
+
+            // Process batches in parallel groups
+            for (let i = 0; i < batches.length; i += PARALLEL_BATCHES) {
+                const parallelBatches = batches.slice(i, i + PARALLEL_BATCHES);
+
+                // Create promises for all batches in this parallel group
+                const batchPromises = parallelBatches.map(batch =>
+                    Promise.all(batch.map(uid => fetchPlayerInfo(uid, clanData.region)))
+                );
+
+                try {
+                    // Wait for all parallel batches to complete
+                    const parallelResults = await Promise.all(batchPromises);
+
+                    // Update UI for each batch result
+                    parallelResults.forEach((batchResults, batchIdx) => {
+                        const batch = parallelBatches[batchIdx];
+                        batch.forEach((uid, idx) => {
+                            const playerInfo = batchResults[idx];
+                            if (playerInfo) {
+                                updatePlayerInfoInUI(uid, playerInfo, clanData.captain_id, clanData.clan_id);
+                            }
+                        });
+                    });
+                } catch (error) {
+                    console.error('Error fetching parallel batches:', error);
+                }
+            }
+        }
+
+        // Load player info for all clans in list (for updating list icons) with parallel batches
+        async function loadAllClanIcons() {
+            const BATCH_SIZE = 10; // Process 10 clans at a time
+            const PARALLEL_BATCHES = 3; // Run 3 batches simultaneously
+            const allClans = clanList;
+
+            // Create all batches
+            const batches = [];
+            for (let i = 0; i < allClans.length; i += BATCH_SIZE) {
+                batches.push(allClans.slice(i, i + BATCH_SIZE));
+            }
+
+            // Process batches in parallel groups
+            for (let i = 0; i < batches.length; i += PARALLEL_BATCHES) {
+                const parallelBatches = batches.slice(i, i + PARALLEL_BATCHES);
+
+                // Create promises for all batches in this parallel group
+                const batchPromises = parallelBatches.map(batch =>
+                    Promise.all(batch.map(clan => fetchPlayerInfo(clan.captain_id, clan.region)))
+                );
+
+                try {
+                    // Wait for all parallel batches to complete
+                    const parallelResults = await Promise.all(batchPromises);
+
+                    // Update UI for each batch result
+                    parallelResults.forEach((batchResults, batchIdx) => {
+                        const batch = parallelBatches[batchIdx];
+                        batch.forEach((clan, idx) => {
+                            const playerInfo = batchResults[idx];
+                            if (playerInfo) {
+                                const headPic = playerInfo?.basicinfo?.headpic || playerInfo?.basicInfo?.headPic || playerInfo?.profileinfo?.avatarid || playerInfo?.profileInfo?.avatarId || 902000092;
+                                const clanEntry = document.querySelector(`[data-clan-id="${clan.clan_id}"]`);
+                                if (clanEntry) {
+                                    const clanEntryIcon = clanEntry.querySelector('.clan-entry-icon');
+                                    if (clanEntryIcon) {
+                                        clanEntryIcon.src = `https://ffitem.droxx64.store/?get=${headPic}.png`;
+                                    }
+                                }
+                            }
+                        });
+                    });
+                } catch (error) {
+                    console.error('Error fetching parallel batches:', error);
+                }
+            }
+        }
+
+        function updatePlayerInfoInUI(uid, playerInfo, captainId, clanId = null) {
+            const headPic = playerInfo?.basicinfo?.headpic || playerInfo?.basicInfo?.headPic || playerInfo?.profileinfo?.avatarid || playerInfo?.profileInfo?.avatarId || 902000092;
+            const badgeId = playerInfo?.basicinfo?.badgeid || playerInfo?.basicInfo?.badgeId || playerInfo?.profileinfo?.badgeid || playerInfo?.profileInfo?.badgeId || null;
+            const nickname = playerInfo?.basicinfo?.nickname || playerInfo?.basicInfo?.nickname || playerInfo?.playerInformation?.name || uid;
+
+            // Update guild emblem (for guild overview design)
+            const guildEmblemMain = document.getElementById('guild-emblem-main');
+            if (guildEmblemMain && uid === captainId) {
+                guildEmblemMain.src = `https://ffitem.droxx64.store/?get=${headPic}.png`;
+            }
+
+            // Update captain info
+            if (uid === captainId) {
+                // Update guild leader in overview panel
+                const guildLeaderAvatar = document.getElementById('guild-leader-avatar-' + clanId);
+                const guildLeaderName = document.getElementById('guild-leader-name-' + clanId);
+                if (guildLeaderAvatar) {
+                    guildLeaderAvatar.src = `https://ffitem.droxx64.store/?get=${headPic}.png`;
+                }
+                if (guildLeaderName) {
+                    guildLeaderName.textContent = nickname;
+                }
+
+                // Update clan entry icon in list (if clanId provided)
+                if (clanId) {
+                    const clanEntry = document.querySelector(`[data-clan-id="${clanId}"]`);
+                    if (clanEntry) {
+                        const clanEntryIcon = clanEntry.querySelector('.clan-entry-icon');
+                        if (clanEntryIcon) {
+                            clanEntryIcon.src = `https://ffitem.droxx64.store/?get=${headPic}.png`;
+                        }
+                    }
+                }
+
+                // Update main avatar in detail panel
+                const clanAvatarMain = document.getElementById('clan-avatar-main');
+                if (clanAvatarMain) {
+                    clanAvatarMain.src = `https://ffitem.droxx64.store/?get=${headPic}.png`;
+                }
+
+                // Update badge
+                const badgeContainer = document.getElementById('clan-badge-container');
+                if (badgeContainer && badgeId) {
+                    badgeContainer.innerHTML = `<img src="https://ffitem.droxx64.store/?get=${badgeId}.png" alt="Badge" class="clan-badge" onerror="this.style.display='none'">`;
+                }
+
+                // Update leader avatar and name
+                const leaderAvatar = document.getElementById('leader-avatar');
+                if (leaderAvatar) {
+                    leaderAvatar.src = `https://ffitem.droxx64.store/?get=${headPic}.png`;
+                }
+                const leaderName = document.getElementById('leader-name');
+                if (leaderName) {
+                    leaderName.textContent = nickname;
+                }
+            } else {
+                // Update vice captain in overview panel
+                if (clanId) {
+                    const vcItems = document.querySelectorAll(`[data-vc-uid="${uid}"]`);
+                    vcItems.forEach(vcItem => {
+                        const vcAvatar = vcItem.querySelector('.guild-vc-avatar') || vcItem.querySelector('.vice-captain-avatar');
+                        const vcName = vcItem.querySelector('.guild-vc-name') || vcItem.querySelector('.vice-captain-name');
+                        if (vcAvatar) {
+                            vcAvatar.src = `https://ffitem.droxx64.store/?get=${headPic}.png`;
+                        }
+                        if (vcName) {
+                            vcName.textContent = nickname;
+                        }
+                    });
+                }
+
+                // Update vice captain in detail panel
+                const vcCard = document.querySelector(`[data-vc-uid="${uid}"]`);
+                if (vcCard) {
+                    const vcAvatar = vcCard.querySelector('.vice-captain-avatar');
+                    const vcName = vcCard.querySelector('.vice-captain-name');
+                    if (vcAvatar) {
+                        vcAvatar.src = `https://ffitem.droxx64.store/?get=${headPic}.png`;
+                    }
+                    if (vcName) {
+                        vcName.textContent = nickname;
+                    }
+                }
+            }
+        }
+
+        async function fetchPlayerInfo(uid, region = 'BD') {
+            try {
+                const response = await fetch(url('/api/player-info'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ uid: uid, region: region })
+                });
+
+                if (response.ok) {
+                    // Check if response is JSON
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const data = await response.json();
+                        return data.data || null;
+                    } else {
+                        console.error('Non-JSON response in getPlayerInfo');
+                        return null;
+                    }
+                }
+                return null;
+            } catch (error) {
+                const errorMsg = error?.message || error?.toString() || JSON.stringify(error) || 'Unknown error';
+                console.warn('Error fetching player info:', errorMsg);
+                return null;
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function getRegionName(region) {
+            const regions = {
+                'BD': 'Bangladesh',
+                'IN': 'India',
+                'PK': 'Pakistan',
+                'ID': 'Indonesia',
+                'BR': 'Brazil',
+                'US': 'United States'
+            };
+            return regions[region] || region;
+        }
+
+        function getEntryType(type) {
+            const types = {
+                0: 'Open',
+                1: 'Approval',
+                2: 'Auto Join'
+            };
+            return types[type] || `Type ${type}`;
+        }
+
+        // Load and display clan members
+        async function loadClanMembers(clanId) {
+            // Check if we're in guild overview mode (members panel exists)
+            // Only load members if player is in their own clan (guild overview mode)
+            const membersPanel = document.getElementById(`guild-members-panel-${clanId}`);
+            const membersSection = document.getElementById(`clan-members-section-${clanId}`);
+
+            // Only load members if membersPanel exists (guild overview mode - player's own clan)
+            // Don't load members for clan search results
+            if (!membersPanel) {
+                console.log('Members panel not found - skipping member fetch (clan search mode)');
+                return;
+            }
+
+            const targetContainer = membersPanel;
+            if (!targetContainer) return;
+
+            try {
+                const response = await fetch(url(`/api/clan-members?clan_id=${clanId}`), {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include'
+                });
+
+                if (response.status === 401) {
+                    targetContainer.innerHTML = '<div class="loading-members"><div>Authentication required</div></div>';
+                    return;
+                }
+
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    console.error('Non-JSON response:', text.substring(0, 200));
+                    targetContainer.innerHTML = '<div class="loading-members"><div>Error: Invalid response from server</div></div>';
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (response.ok && data.success && data.data && data.data.members) {
+                    const members = data.data.members;
+                    displayClanMembers(members, targetContainer);
+                } else {
+                    targetContainer.innerHTML = '<div class="loading-members"><div>Failed to load members</div></div>';
+                }
+            } catch (error) {
+                console.error('Error loading clan members:', error);
+                targetContainer.innerHTML = '<div class="loading-members"><div>Error loading members</div></div>';
+            }
+        }
+
+        // Display clan members in table
+        function displayClanMembers(members, container) {
+            if (!members || members.length === 0) {
+                container.innerHTML = '<div class="loading-members"><div>No members found</div></div>';
+                return;
+            }
+
+            let html = '<div class="section-title">Clan Members</div>';
+            html += '<table class="members-table">';
+            html += '<thead><tr>';
+            html += '<th>Member</th>';
+            html += '<th>Weekly Glory</th>';
+            html += '<th>Total Glory</th>';
+            html += '</tr></thead>';
+            html += '<tbody>';
+
+            // Sort members by total_activeness (weekly glory) descending
+            const sortedMembers = [...members].sort((a, b) => {
+                const aGlory = a.total_activeness || 0;
+                const bGlory = b.total_activeness || 0;
+                return bGlory - aGlory;
+            });
+
+            sortedMembers.forEach(member => {
+                const accountId = member.account_id || '';
+                const nickname = member.nickname || accountId;
+                const headPic = member.headPic || 902000092;
+                const weeklyGlory = member.total_activeness !== null && member.total_activeness !== undefined ? member.total_activeness : 0;
+                const totalGlory = member.guild_war_total_point !== null && member.guild_war_total_point !== undefined ? member.guild_war_total_point : 0;
+
+                html += `<tr onclick="showMemberInfo('${accountId}', '${escapeHtml(nickname)}', '${headPic}', event)">`;
+                html += '<td>';
+                html += '<div class="member-name">';
+                html += `<img src="https://ffitem.droxx64.store/?get=${headPic}.png" alt="${escapeHtml(nickname)}" class="member-avatar" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\'%3E%3Crect fill=\'%23000\' width=\'40\' height=\'40\'/%3E%3C/svg%3E'">`;
+                html += `<span>${escapeHtml(nickname)}</span>`;
+                html += '</div>';
+                html += '</td>';
+                html += `<td class="member-glory ${weeklyGlory === 0 ? 'zero' : ''}">${weeklyGlory.toLocaleString()}</td>`;
+                html += `<td class="member-glory ${totalGlory === 0 ? 'zero' : ''}">${totalGlory.toLocaleString()}</td>`;
+                html += '</tr>';
+            });
+
+            html += '</tbody>';
+            html += '</table>';
+
+            container.innerHTML = html;
+        }
+
+        // Join Guild function
+        async function joinGuild(clanId) {
+            const btn = document.getElementById(`join-guild-btn-${clanId}`);
+            if (!btn) return;
+
+            // Disable button
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> JOINING...';
+
+            try {
+                const response = await fetch(url('/api/join-clan'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ clan_id: clanId })
+                });
+
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    console.error('Non-JSON response in joinGuild:', text.substring(0, 200));
+                    showNotification('Error: Server returned invalid response. Status: ' + response.status, 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-users"></i> JOIN';
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (response.status === 401) {
+                    showNotification('Authentication required. Please login again.', 'error');
+                    setTimeout(() => {
+                        window.location.href = url('/login');
+                    }, 2000);
+                    return;
+                }
+
+                if (response.ok && data.success) {
+                    showNotification(data.message || 'Join request sent successfully!', 'success');
+                    btn.innerHTML = '<i class="fas fa-check"></i> REQUEST SENT';
+                    btn.style.background = 'linear-gradient(135deg, #a855f7, #00cc6a)';
+                } else {
+                    showNotification(data.message || 'Error joining guild', 'error');
+                    btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> JOIN GUILD';
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                showNotification('Network error: ' + error.message, 'error');
+                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> JOIN GUILD';
+                btn.disabled = false;
+            }
+        }
+
+        async function quitClan(clanId) {
+            const btn = document.getElementById(`quit-clan-btn-${clanId}`);
+            if (!btn) return;
+
+            // Confirm before quitting
+            const confirmed = confirm('Are you sure you want to quit this guild? This action cannot be undone.');
+            if (!confirmed) return;
+
+            // Disable button
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> QUITTING...';
+
+            try {
+                const response = await fetch(url('/api/quit-clan'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ clan_id: clanId })
+                });
+
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    console.error('Non-JSON response in quitGuild:', text.substring(0, 200));
+                    showNotification('Error: Server returned invalid response. Status: ' + response.status, 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-sign-out-alt"></i> QUIT';
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (response.status === 401) {
+                    showNotification('Authentication required. Please login again.', 'error');
+                    setTimeout(() => {
+                        window.location.href = url('/login');
+                    }, 2000);
+                    return;
+                }
+
+                if (response.ok && data.success) {
+                    showNotification(data.message || 'Left guild successfully!', 'success');
+                    btn.innerHTML = '<i class="fas fa-check"></i> LEFT GUILD';
+                    btn.style.background = 'linear-gradient(135deg, #a855f7, #00cc6a)';
+
+                    // Reload page after 2 seconds to show updated clan status
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    showNotification(data.message || 'Error quitting guild', 'error');
+                    btn.innerHTML = '<i class="fas fa-sign-out-alt"></i> QUIT GUILD';
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                showNotification('Network error: ' + error.message, 'error');
+                btn.innerHTML = '<i class="fas fa-sign-out-alt"></i> QUIT GUILD';
+                btn.disabled = false;
+            }
+        }
+
+        // Global variables for clan list
+        let clanList = [];
+        let selectedClanId = null;
+
+        // Auto-fetch random clans on page load
+        async function loadRandomClans() {
+            const loading = document.getElementById('loading');
+            const resultContainer = document.getElementById('resultContainer');
+            const resultData = document.getElementById('resultData');
+            const container = document.querySelector('.clan-display-container');
+            const clanListPanel = document.querySelector('.clan-list-panel');
+
+            // Make sure clan list panel is visible
+            if (clanListPanel) {
+                clanListPanel.style.display = 'block';
+            }
+            if (container) {
+                container.classList.remove('no-list');
+            }
+
+            loading.classList.add('show');
+            resultContainer.classList.remove('show');
+
+            try {
+                const apiUrl = url('/api/get-clans');
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include'
+                });
+
+                if (response.status === 401) {
+                    showNotification('Authentication required. Please login again.', 'error');
+                    setTimeout(() => {
+                        window.location.href = url('/login');
+                    }, 2000);
+                    return;
+                }
+
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    console.error('Non-JSON response in loadRandomClans:', text.substring(0, 200));
+                    showNotification('Error: Server returned invalid response. Status: ' + response.status, 'error');
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (response.ok && data.success && data.data && data.data.clans) {
+                    clanList = data.data.clans;
+
+                    // Display clan list
+                    displayClanList(clanList);
+
+                    // Load all clan icons in background
+                    loadAllClanIcons();
+
+                    // Select first clan by default
+                    if (clanList.length > 0) {
+                        selectClan(clanList[0].clan_id);
+                    }
+
+                    resultContainer.classList.add('show');
+                    showNotification('Random clans loaded successfully!', 'success');
+                } else {
+                    showNotification(data.message || 'Error loading clans', 'error');
+                }
+            } catch (error) {
+                showNotification('Network error: ' + error.message, 'error');
+            } finally {
+                loading.classList.remove('show');
+            }
+        }
+
+        // Display clan list in left panel
+        function displayClanList(clans) {
+            const resultData = document.getElementById('resultData');
+
+            let html = '<div class="clan-display-container">';
+
+            // Left Panel - Clan List
+            html += '<div class="clan-list-panel">';
+
+            // Column Headers
+            html += '<div class="clan-tabs">';
+            html += '<div class="clan-tab">GUILD INFO</div>';
+            html += '<div class="clan-tab">GUILD ACTIVITY</div>';
+            html += '<div class="clan-tab">MEMBERS</div>';
+            html += '<div class="clan-tab">APPROVAL METHOD</div>';
+            html += '</div>';
+
+            // Clan Entries
+            clans.forEach((clan, index) => {
+                const isSelected = selectedClanId === clan.clan_id || (index === 0 && !selectedClanId);
+                html += `<div class="clan-entry ${isSelected ? 'selected' : ''}" onclick="selectClan('${clan.clan_id}')" data-clan-id="${clan.clan_id}">`;
+
+                // GUILD INFO Column
+                html += '<div class="clan-entry-column">';
+                html += '<div class="clan-entry-info-column">';
+                html += `<img src="https://ffitem.droxx64.store/?get=902000092.png" alt="Clan" class="clan-entry-icon" data-clan-icon="${clan.clan_id}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'50\' height=\'50\'%3E%3Crect fill=\'%23000\' width=\'50\' height=\'50\'/%3E%3C/svg%3E'">`;
+                html += '<div class="clan-entry-info">';
+                html += `<div class="clan-entry-name">${escapeHtml(clan.clan_name || 'Unknown Clan')}</div>`;
+                html += '<div class="clan-entry-type">CASUAL</div>';
+                html += '</div>';
+                html += '</div>';
+                html += '</div>';
+
+                // GUILD ACTIVITY Column
+                html += '<div class="clan-entry-column">';
+                html += `<div class="clan-entry-level">Lv. ${clan.clan_level || 0}</div>`;
+                html += '</div>';
+
+                // MEMBERS Column
+                html += '<div class="clan-entry-column">';
+                html += `<div class="clan-entry-members">${clan.member_num || 0}/${clan.capacity || 0}</div>`;
+                html += '</div>';
+
+                // APPROVAL METHOD Column
+                html += '<div class="clan-entry-column">';
+                html += `<div class="clan-entry-approval">${getEntryType(clan.entry_type)}</div>`;
+                if (clan.entry_level !== undefined) {
+                    html += `<div style="color: rgba(255,255,255,0.7); font-size: 0.85rem; margin-top: 3px;">Lv. ${clan.entry_level}</div>`;
+                }
+                html += '</div>';
+
+                html += '</div>'; // End clan entry
+            });
+
+            html += '</div>'; // End left panel
+
+            // Right Panel - Will be populated when clan is selected
+            html += '<div class="clan-detail-panel" id="clanDetailPanel">';
+            html += '<div class="clan-card">';
+            html += '<div style="text-align: center; color: rgba(255,255,255,0.5); padding: 50px;">Select a clan to view details</div>';
+            html += '</div>';
+            html += '</div>';
+
+            html += '</div>'; // End container
+
+            resultData.innerHTML = html;
+        }
+
+        // Select a clan and show its details
+        async function selectClan(clanId) {
+            selectedClanId = clanId;
+
+            // Update selected state in list
+            document.querySelectorAll('.clan-entry').forEach(entry => {
+                if (entry.dataset.clanId === clanId) {
+                    entry.classList.add('selected');
+                } else {
+                    entry.classList.remove('selected');
+                }
+            });
+
+            // Find clan data
+            const clan = clanList.find(c => c.clan_id === clanId);
+            if (!clan) {
+                // If not in list, fetch it
+                await searchClanById(clanId);
+                return;
+            }
+
+            // Display clan details
+            await displayClanDetails(clan);
+        }
+
+        // Display clan details in right panel
+        async function displayClanDetails(clan) {
+            let detailPanel = document.getElementById('clanDetailPanel');
+            let container = document.querySelector('.clan-display-container');
+            const clanListPanel = document.querySelector('.clan-list-panel');
+            const resultContainer = document.getElementById('resultContainer');
+
+            // If container doesn't exist, create it
+            if (!container) {
+                const resultData = document.getElementById('resultData');
+                if (!resultData) return;
+
+                // Check if clan list panel exists - if yes, don't add no-list class
+                const hasListPanel = clanListPanel && clanListPanel.style.display !== 'none';
+                let html = '<div class="clan-display-container' + (hasListPanel ? '' : ' no-list') + '">';
+                html += '<div class="clan-detail-panel" id="clanDetailPanel"></div>';
+                html += '</div>';
+                resultData.innerHTML = html;
+
+                container = document.querySelector('.clan-display-container');
+                detailPanel = document.getElementById('clanDetailPanel');
+
+                // Show result container
+                if (resultContainer) {
+                    resultContainer.classList.add('show');
+                }
+            } else {
+                // Ensure clan list panel is visible if it exists
+                if (clanListPanel && clanListPanel.style.display !== 'none') {
+                    container.classList.remove('no-list');
+                }
+
+                // Show result container
+                if (resultContainer) {
+                    resultContainer.classList.add('show');
+                }
+            }
+
+            if (!detailPanel) return;
+
+            // Check if we need to fetch full details or use provided data
+            const clanId = clan.clan_id || clan.clanId || clan.id;
+
+            // If clan data already has all details, use it directly
+            if (clan.clan_name && clan.captain_id) {
+                const html = await formatClanDataBasic(clan);
+                detailPanel.innerHTML = html;
+                // Load player info in background
+                loadPlayerInfoAndUpdate(clan);
+                // Don't load clan members automatically - only when user clicks MEMBERS tab
+            } else {
+                // Fetch full clan details
+                try {
+                    const response = await fetch(url('/api/clan-search'), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            clan_id: clanId
+                        })
+                    });
+
+                    // Check if response is JSON
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        const text = await response.text();
+                        console.error('Non-JSON response:', text.substring(0, 200));
+                        return;
+                    }
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        // Use existing formatClanDataBasic function (returns right panel HTML)
+                        const html = await formatClanDataBasic(data.data);
+                        detailPanel.innerHTML = html;
+
+                        // Load player info in background
+                        loadPlayerInfoAndUpdate(data.data);
+                        // Don't load clan members automatically - only when user clicks MEMBERS tab
+                    } else {
+                        // Fallback: show basic info from list
+                        const html = await formatClanDataBasic(clan);
+                        detailPanel.innerHTML = html;
+                        // Don't load clan members automatically - only when user clicks MEMBERS tab
+                    }
+                } catch (error) {
+                    console.error('Error fetching clan details:', error);
+                    // Fallback: show basic info
+                    const html = await formatClanDataBasic(clan);
+                    detailPanel.innerHTML = html;
+                    // Don't load clan members automatically - only when user clicks MEMBERS tab
+                }
+            }
+        }
+
+        // Search clan by ID (for manual search)
+        async function searchClanById(clanId) {
+            const loading = document.getElementById('loading');
+            loading.classList.add('show');
+
+            try {
+                const response = await fetch(url('/api/clan-search'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ clan_id: clanId })
+                });
+
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    console.error('Non-JSON response:', text.substring(0, 200));
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Replace clan list with only the searched clan (hide random clans)
+                    clanList = [data.data];
+                    displayClanList(clanList);
+
+                    // Select it
+                    selectClan(data.data.clan_id);
+                    showNotification('Clan information retrieved successfully!', 'success');
+                } else {
+                    showNotification(data.message || 'Error searching clan', 'error');
+                }
+            } catch (error) {
+                showNotification('Network error: ' + error.message, 'error');
+            } finally {
+                loading.classList.remove('show');
+            }
+        }
+
+        // Show member info modal
+        async function showMemberInfo(accountId, nickname, headPic, event) {
+            const modal = document.getElementById('memberModal');
+            const modalTitle = document.getElementById('memberModalTitle');
+            const modalBody = document.getElementById('memberModalBody');
+            const modalContent = modal.querySelector('.member-modal-content');
+
+            // Prevent event bubbling
+            if (event) {
+                event.stopPropagation();
+            }
+
+            // Get clicked row element
+            const clickedRow = event ? event.currentTarget : null;
+
+            // Function to update popup position relative to row
+            const updatePopupPosition = () => {
+                if (!clickedRow) {
+                    // Fallback to click position if row not available
+                    let clickX = event ? event.clientX : window.innerWidth / 2;
+                    let clickY = event ? event.clientY : window.innerHeight / 2;
+
+                    const popupWidth = 400;
+                    const popupHeight = 500;
+                    const padding = 10;
+
+                    let popupX = clickX + 10;
+                    let popupY = clickY;
+
+                    if (popupX + popupWidth > window.innerWidth) {
+                        popupX = clickX - popupWidth - 10;
+                    }
+                    if (popupX < padding) popupX = padding;
+                    if (popupY + popupHeight > window.innerHeight) {
+                        popupY = window.innerHeight - popupHeight - padding;
+                    }
+                    if (popupY < padding) popupY = padding;
+
+                    modalContent.style.left = popupX + 'px';
+                    modalContent.style.top = popupY + 'px';
+                    return;
+                }
+
+                const rowRect = clickedRow.getBoundingClientRect();
+                const popupWidth = 400;
+                const popupHeight = 500;
+                const padding = 10;
+
+                // Position popup to the right of the row
+                let popupX = rowRect.right + 10;
+                let popupY = rowRect.top;
+
+                // Adjust if popup goes off screen
+                if (popupX + popupWidth > window.innerWidth) {
+                    popupX = rowRect.left - popupWidth - 10;
+                }
+                if (popupX < padding) {
+                    popupX = padding;
+                }
+
+                // Adjust vertical position
+                if (popupY + popupHeight > window.innerHeight) {
+                    popupY = window.innerHeight - popupHeight - padding;
+                }
+                if (popupY < padding) {
+                    popupY = padding;
+                }
+
+                // Set position (fixed relative to viewport, updates on scroll)
+                modalContent.style.left = popupX + 'px';
+                modalContent.style.top = popupY + 'px';
+            };
+
+            // Update position initially
+            updatePopupPosition();
+
+            // Add scroll and resize listeners to update position
+            const updateHandler = () => {
+                if (modal.classList.contains('show')) {
+                    updatePopupPosition();
+                }
+            };
+
+            // Remove old listeners if they exist
+            if (modal._updateHandler) {
+                window.removeEventListener('scroll', modal._updateHandler, true);
+                window.removeEventListener('resize', modal._updateHandler);
+            }
+
+            // Add new listeners
+            modal._updateHandler = updateHandler;
+            window.addEventListener('scroll', updateHandler, true);
+            window.addEventListener('resize', updateHandler);
+
+            modal.classList.add('show');
+            modalTitle.textContent = nickname || accountId;
+            modalBody.innerHTML = '<div class="loading-members"><i class="fas fa-spinner fa-spin"></i><div>Loading member information...</div></div>';
+
+            try {
+                const response = await fetch(url('/api/player-info'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ uid: accountId })
+                });
+
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    console.error('Non-JSON response in showMemberInfo:', text.substring(0, 200));
+                    showNotification('Error: Server returned invalid response. Status: ' + response.status, 'error');
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (response.ok && (data.success || data.status === 'success')) {
+                    const playerData = data.data || data;
+                    modalBody.innerHTML = formatMemberInfo(playerData, accountId, nickname, headPic);
+                    // Update position after content loads (in case height changes)
+                    setTimeout(updatePopupPosition, 100);
+                } else {
+                    modalBody.innerHTML = `<div class="error-message">${escapeHtml(data.message || data.error || 'Error loading member information')}</div>`;
+                }
+            } catch (error) {
+                modalBody.innerHTML = `<div class="error-message">Network error: ${escapeHtml(error.message)}</div>`;
+            }
+        }
+
+        // Close member modal
+        function closeMemberModal() {
+            const modal = document.getElementById('memberModal');
+            modal.classList.remove('show');
+
+            // Remove scroll and resize listeners
+            if (modal._updateHandler) {
+                window.removeEventListener('scroll', modal._updateHandler, true);
+                window.removeEventListener('resize', modal._updateHandler);
+                modal._updateHandler = null;
+            }
+        }
+
+        // Format member info for display
+        function formatMemberInfo(playerData, accountId, nickname, headPic) {
+            const basicInfo = playerData.basicinfo || playerData.basicInfo || {};
+            const profileInfo = playerData.profileinfo || playerData.profileInfo || {};
+            const socialInfo = playerData.socialinfo || playerData.socialInfo || {};
+            const diamondInfo = playerData.diamondcostres || playerData.diamondInfo || {};
+            const creditScoreInfo = playerData.creditscoreinfo || playerData.creditScoreInfo || {};
+            const playerInformation = playerData.playerInformation || {};
+            const clanBasicInfo = playerData.clanbasicinfo || playerData.clanBasicInfo || {};
+
+            const avatarUrl = `https://ffitem.droxx64.store/?get=${headPic || basicInfo.headpic || basicInfo.headPic || profileInfo.avatarid || profileInfo.avatarId || 902000092}.png`;
+            const clothes = profileInfo.equipedskills || profileInfo.equipedSkills || profileInfo.clothes || [];
+
+            let html = '<div class="info-card">';
+
+            // Member Header
+            html += '<div class="player-header">';
+            html += `<img src="${avatarUrl}" alt="${escapeHtml(nickname)}" class="player-avatar" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'120\' height=\'120\'%3E%3Crect fill=\'%23000\' width=\'120\' height=\'120\'/%3E%3C/svg%3E'">`;
+            html += `<div class="player-name">${escapeHtml(nickname || basicInfo.nickname || playerInformation.name || 'Unknown Player')}</div>`;
+            html += `<div class="player-level">Level ${basicInfo.level || playerInformation.level || 0}</div>`;
+            html += '</div>';
+
+            // Basic Information
+            html += '<div class="info-section">';
+            html += '<div class="section-title"><i class="fas fa-info-circle"></i> Basic Information</div>';
+            html += '<div class="member-info-grid">';
+            html += `<div class="member-info-item"><div class="member-info-label">Account ID</div><div class="member-info-value">${basicInfo.accountid || basicInfo.accountId || accountId || 'N/A'}</div></div>`;
+            html += `<div class="member-info-item"><div class="member-info-label">Region</div><div class="member-info-value">${basicInfo.region || 'N/A'}</div></div>`;
+            html += `<div class="member-info-item"><div class="member-info-label">Level</div><div class="member-info-value">${basicInfo.level || 0}</div></div>`;
+            html += `<div class="member-info-item"><div class="member-info-label">Experience</div><div class="member-info-value">${basicInfo.exp || 0}</div></div>`;
+            html += `<div class="member-info-item"><div class="member-info-label">BR Rank</div><div class="member-info-value">${basicInfo.rank || 'N/A'}</div></div>`;
+            html += `<div class="member-info-item"><div class="member-info-label">BR Points</div><div class="member-info-value">${basicInfo.rankingpoints || basicInfo.rankingPoints || 0}</div></div>`;
+            html += `<div class="member-info-item"><div class="member-info-label">CS Rank</div><div class="member-info-value">${basicInfo.csrank || basicInfo.csRank || 'N/A'}</div></div>`;
+            html += `<div class="member-info-item"><div class="member-info-label">CS Points</div><div class="member-info-value">${basicInfo.csrankingpoints || basicInfo.csRankingPoints || 0}</div></div>`;
+            if (basicInfo.hipporank || basicInfo.hippoRank) {
+                html += `<div class="member-info-item"><div class="member-info-label">Hippo Rank</div><div class="member-info-value">${basicInfo.hipporank || basicInfo.hippoRank || 'N/A'}</div></div>`;
+                html += `<div class="member-info-item"><div class="member-info-label">Hippo Points</div><div class="member-info-value">${basicInfo.hipporankingpoints || basicInfo.hippoRankingPoints || 0}</div></div>`;
+            }
+            html += '</div>';
+            html += '</div>';
+
+            // Profile Information
+            html += '<div class="info-section">';
+            html += '<div class="section-title"><i class="fas fa-user"></i> Profile Information</div>';
+            html += '<div class="member-info-grid">';
+            html += `<div class="member-info-item"><div class="member-info-label">Avatar ID</div><div class="member-info-value">${profileInfo.avatarid || profileInfo.avatarId || 'N/A'}</div></div>`;
+            html += `<div class="member-info-item"><div class="member-info-label">Likes</div><div class="member-info-value">${basicInfo.liked || playerInformation.likes || 0}</div></div>`;
+            html += `<div class="member-info-item"><div class="member-info-label">Badge Count</div><div class="member-info-value">${basicInfo.badgecnt || basicInfo.badgeCnt || 0}</div></div>`;
+            html += `<div class="member-info-item"><div class="member-info-label">Badge ID</div><div class="member-info-value">${basicInfo.badgeid || basicInfo.badgeId || 'N/A'}</div></div>`;
+            html += '</div>';
+            html += '</div>';
+
+            // Clothes Information
+            if (clothes && Array.isArray(clothes) && clothes.length > 0) {
+                html += '<div class="info-section">';
+                html += '<div class="section-title"><i class="fas fa-tshirt"></i> Clothes</div>';
+                html += '<div class="member-clothes-grid">';
+
+                clothes.forEach((clothesId) => {
+                    const clothesUrl = `https://ffitem.droxx64.store/?get=${clothesId}.png`;
+                    html += '<div class="member-clothes-item">';
+                    html += `<img src="${clothesUrl}" alt="Clothes ${clothesId}" class="member-clothes-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\'%3E%3Crect fill=\'%23000\' width=\'80\' height=\'80\'/%3E%3C/svg%3E'">`;
+                    html += `<div class="member-clothes-id">${clothesId}</div>`;
+                    html += '</div>';
+                });
+
+                html += '</div>';
+                html += '</div>';
+            }
+
+            // Social Information
+            if (socialInfo.signature || socialInfo.language) {
+                html += '<div class="info-section">';
+                html += '<div class="section-title"><i class="fas fa-comments"></i> Social Information</div>';
+                html += '<div class="member-info-grid">';
+                html += `<div class="member-info-item"><div class="member-info-label">Language</div><div class="member-info-value">${socialInfo.language || 'N/A'}</div></div>`;
+                html += `<div class="member-info-item"><div class="member-info-label">Signature</div><div class="member-info-value">${escapeHtml(socialInfo.signature || 'N/A')}</div></div>`;
+                html += '</div>';
+                html += '</div>';
+            }
+
+            // Diamond Information
+            if (diamondInfo.diamondcost !== undefined || diamondInfo.diamondCost !== undefined) {
+                html += '<div class="info-section">';
+                html += '<div class="section-title"><i class="fas fa-gem"></i> Diamond Information</div>';
+                html += '<div class="member-info-grid">';
+                html += `<div class="member-info-item"><div class="member-info-label">Diamond Cost</div><div class="member-info-value">${diamondInfo.diamondcost || diamondInfo.diamondCost || 0}</div></div>`;
+                html += '</div>';
+                html += '</div>';
+            }
+
+            // Credit Score Information
+            if (creditScoreInfo.creditscore !== undefined || creditScoreInfo.creditScore !== undefined) {
+                html += '<div class="info-section">';
+                html += '<div class="section-title"><i class="fas fa-shield-alt"></i> Credit Score</div>';
+                html += '<div class="member-info-grid">';
+                html += `<div class="member-info-item"><div class="member-info-label">Credit Score</div><div class="member-info-value">${creditScoreInfo.creditscore || creditScoreInfo.creditScore || 100}</div></div>`;
+                html += '</div>';
+                html += '</div>';
+            }
+
+            // Clan Information
+            if (clanBasicInfo && Object.keys(clanBasicInfo).length > 0) {
+                html += '<div class="info-section">';
+                html += '<div class="section-title"><i class="fas fa-users"></i> Clan Information</div>';
+                html += '<div class="member-info-grid">';
+                html += `<div class="member-info-item"><div class="member-info-label">Clan Name</div><div class="member-info-value">${clanBasicInfo.clanname || clanBasicInfo.clanName || 'N/A'}</div></div>`;
+                html += `<div class="member-info-item"><div class="member-info-label">Clan ID</div><div class="member-info-value">${clanBasicInfo.clanid || clanBasicInfo.clanId || 'N/A'}</div></div>`;
+                html += `<div class="member-info-item"><div class="member-info-label">Clan Level</div><div class="member-info-value">${clanBasicInfo.clanlevel || clanBasicInfo.clanLevel || 'N/A'}</div></div>`;
+                html += `<div class="member-info-item"><div class="member-info-label">Members</div><div class="member-info-value">${clanBasicInfo.membernum || clanBasicInfo.memberNum || 0}/${clanBasicInfo.capacity || 'N/A'}</div></div>`;
+                html += '</div>';
+                html += '</div>';
+            }
+
+            html += '</div>';
+
+            return html;
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function (event) {
+            const modal = document.getElementById('memberModal');
+            const modalContent = modal.querySelector('.member-modal-content');
+            // Close if clicking outside modal content
+            if (modal.classList.contains('show') && !modalContent.contains(event.target) && !event.target.closest('.members-table tbody tr')) {
+                closeMemberModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeMemberModal();
+            }
+        });
+
+        // Close mobile menu when clicking on nav links
+        // Check if player has a clan and load it, otherwise load random clans
+        async function checkMyClanAndLoad() {
+            try {
+                const apiUrl = url('/api/my-clan');
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include'
+                });
+
+                if (response.status === 401) {
+                    showNotification('Authentication required. Please login again.', 'error');
+                    setTimeout(() => {
+                        window.location.href = url('/login');
+                    }, 2000);
+                    return;
+                }
+
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    console.error('Non-JSON response in loadMyClan:', text.substring(0, 200));
+                    showNotification('Error: Server returned invalid response. Status: ' + response.status, 'error');
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (response.ok && data.success && data.has_clan && data.data) {
+                    // Player has a clan - show it and hide search/random clan list
+                    const container = document.querySelector('.clan-display-container');
+                    const clanListPanel = document.querySelector('.clan-list-panel');
+
+                    if (clanListPanel) {
+                        clanListPanel.style.display = 'none';
+                    }
+                    if (container) {
+                        container.classList.add('no-list');
+                    }
+
+                    // Extract clan data from response
+                    let clanData = data.data;
+                    if (clanData.data) {
+                        clanData = clanData.data;
+                    }
+
+                    // Ensure result container is visible
+                    const resultContainer = document.getElementById('resultContainer');
+                    if (resultContainer) {
+                        resultContainer.classList.add('show');
+                    }
+
+                    // Display guild overview design (when player is in guild)
+                    const html = await formatGuildOverview(clanData);
+                    const resultData = document.getElementById('resultData');
+                    if (resultData) {
+                        resultData.innerHTML = html;
+                    }
+
+                    // Load player info in background
+                    loadPlayerInfoAndUpdate(clanData);
+
+                    // Members will be loaded when MEMBERS tab is clicked
+                    // No need to auto-load here
+
+                    showNotification('Your guild loaded successfully!', 'success');
+                } else {
+                    // Player has no clan - show search/random clan list
+                    // Make sure clan list panel is visible
+                    const container = document.querySelector('.clan-display-container');
+                    const clanListPanel = document.querySelector('.clan-list-panel');
+                    const resultContainer = document.getElementById('resultContainer');
+                    const resultData = document.getElementById('resultData');
+
+                    // Show clan list panel
+                    if (clanListPanel) {
+                        clanListPanel.style.display = 'block';
+                    }
+                    if (container) {
+                        container.classList.remove('no-list');
+                    }
+
+                    // Hide result container (guild overview)
+                    if (resultContainer) {
+                        resultContainer.classList.remove('show');
+                    }
+                    if (resultData) {
+                        resultData.innerHTML = '';
+                    }
+
+                    // Load random clans
+                    loadRandomClans();
+                }
+            } catch (error) {
+                console.error('Error checking my clan:', error);
+                // On error, fallback to random clans
+                loadRandomClans();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.mobile-nav-btn').forEach(link => {
+                link.addEventListener('click', closeMobileMenu);
+            });
+
+            // Load clan data directly (only one account now)
+            checkMyClanAndLoad();
+        });
+    </script>
+    <script type='text/javascript'
+        src='//pl28031128.effectivegatecpm.com/7f/fe/ea/7ffeeae047465337e332ea6fed7b470b.js'></script>
+    <script type='text/javascript'
+        src='//pl28159394.effectivegatecpm.com/91/f4/30/91f430b902c64e5b3acb3e559c9090ca.js'></script>
+</body>
+

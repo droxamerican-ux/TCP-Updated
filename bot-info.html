@@ -1,0 +1,1128 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <base href="./">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Info - Free Fire Bot</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #a855f7;
+            --secondary-color: #ff8800;
+            --success-color: #a855f7;
+            --warning-color: #ff8800;
+            --danger-color: #ff4444;
+            --dark-bg: #020617;
+            --card-bg: rgba(20, 20, 20, 0.95);
+            --text-dark: #ffffff;
+            --text-light: #888888;
+            --border-radius: 12px;
+            --shadow: 0 8px 32px rgba(168, 85, 247, 0.1), 0 4px 16px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 12px 48px rgba(168, 85, 247, 0.2);
+            --gradient-primary: linear-gradient(135deg, #a855f7 0%, #00cc6e 100%);
+            --gradient-success: linear-gradient(135deg, #a855f7 0%, #00cc6e 100%);
+            --gradient-danger: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            --gradient-warning: linear-gradient(135deg, #ff8800 0%, #cc6600 100%);
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #020617;
+            min-height: 100vh;
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 136, 0, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: 15px;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+            letter-spacing: 1px;
+        }
+
+        .header h1::before {
+            content: '🤖';
+            display: inline-block;
+            margin-right: 15px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            font-weight: 400;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 14px 28px;
+            background: var(--card-bg);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(168, 85, 247, 0.2);
+            font-weight: 600;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-btn:hover {
+            background: rgba(168, 85, 247, 0.1);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            background: var(--gradient-primary);
+            color: black;
+            border-color: var(--primary-color);
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: var(--card-bg);
+            border: 2px solid rgba(168, 85, 247, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            color: var(--primary-color);
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+
+        .mobile-menu-toggle:hover {
+            border-color: var(--primary-color);
+        }
+
+        /* Mobile Side Panel */
+        .mobile-side-panel {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 280px;
+            height: 100%;
+            background: var(--card-bg);
+            border-right: 2px solid rgba(168, 85, 247, 0.2);
+            z-index: 1000;
+            transition: left 0.3s ease;
+            padding: 20px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .mobile-side-panel.show {
+            left: 0;
+        }
+
+        .mobile-side-panel h3 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(168, 85, 247, 0.2);
+        }
+
+        .mobile-nav-btn {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            background: var(--card-bg);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 2px solid rgba(168, 85, 247, 0.2);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .mobile-nav-btn:hover {
+            background: rgba(168, 85, 247, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .mobile-nav-btn.active {
+            background: var(--gradient-primary);
+            color: black;
+            border-color: var(--primary-color);
+        }
+
+        .mobile-nav-btn.logout {
+            background: var(--gradient-danger);
+            color: white;
+            border-color: var(--danger-color);
+        }
+
+        /* Mobile Overlay */
+        .mobile-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .info-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            border: 2px solid rgba(168, 85, 247, 0.15);
+        }
+
+        .info-section {
+            margin-bottom: 30px;
+        }
+
+        .info-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .info-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(168, 85, 247, 0.1);
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-value {
+            font-size: 1.2rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .player-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--primary-color);
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+            margin: 0 auto 20px;
+            display: block;
+        }
+
+        .player-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .player-name {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .player-level {
+            font-size: 1.2rem;
+            color: var(--text-light);
+        }
+
+        .clothes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .clothes-item {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border: 2px solid rgba(168, 85, 247, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .clothes-item:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+        }
+
+        .clothes-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            margin: 0 auto 10px;
+            display: block;
+            object-fit: contain;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .clothes-id {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            word-break: break-all;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-light);
+        }
+
+        .spinner {
+            border: 4px solid rgba(168, 85, 247, 0.1);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error-message {
+            background: rgba(255, 68, 68, 0.1);
+            border: 2px solid var(--danger-color);
+            color: var(--danger-color);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .refresh-btn {
+            padding: 12px 24px;
+            background: var(--gradient-primary);
+            color: black;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+            margin-top: 20px;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(168, 85, 247, 0.4);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: var(--gradient-success);
+        }
+
+        .notification.error {
+            background: var(--gradient-danger);
+        }
+
+        .notification.info {
+            background: var(--gradient-primary);
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .nav-buttons {
+                display: none;
+            }
+
+            .container {
+                padding: 15px 10px;
+                padding-top: 70px;
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+
+            .header {
+                margin-bottom: 20px;
+                text-align: center;
+            }
+
+            .header h1 {
+                font-size: clamp(1.8rem, 6vw, 2.5rem);
+                margin-bottom: 20px;
+                line-height: 1.2;
+            }
+
+            .header p {
+                font-size: 1rem;
+                margin-bottom: 0;
+                opacity: 0.9;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .clothes-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+                gap: 10px;
+            }
+
+            .clothes-image {
+                width: 60px;
+                height: 60px;
+            }
+
+            .info-card {
+                padding: 20px 15px;
+                margin-bottom: 20px;
+                border-radius: 15px;
+            }
+
+            .info-item {
+                padding: 15px;
+            }
+
+            .info-label {
+                font-size: 0.85rem;
+            }
+
+            .info-value {
+                font-size: 1.1rem;
+            }
+
+            .section-title {
+                font-size: 1.2rem;
+                margin-bottom: 15px;
+            }
+
+            .player-header {
+                margin-bottom: 25px;
+            }
+
+            .player-avatar {
+                width: 100px;
+                height: 100px;
+            }
+
+            .player-name {
+                font-size: 1.5rem;
+            }
+
+            .player-level {
+                font-size: 1rem;
+            }
+
+            .refresh-btn {
+                width: 100%;
+                margin-left: 0 !important;
+                margin-top: 10px;
+                padding: 12px 20px;
+                font-size: 0.95rem;
+            }
+
+            .loading {
+                padding: 30px 20px;
+            }
+
+            .spinner {
+                width: 40px;
+                height: 40px;
+            }
+
+            .error-message {
+                padding: 15px;
+                font-size: 0.9rem;
+            }
+
+            .notification {
+                right: 8px;
+                left: 8px;
+                transform: translateY(-100px);
+                font-size: 0.8rem;
+                padding: 10px 12px;
+            }
+
+            .notification.show {
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px 5px;
+                padding-top: 60px;
+            }
+
+            .header h1 {
+                font-size: clamp(1.2rem, 6vw, 1.6rem);
+            }
+
+            .info-card {
+                padding: 15px 10px;
+            }
+
+            .info-item {
+                padding: 12px;
+            }
+
+            .info-label {
+                font-size: 0.8rem;
+            }
+
+            .info-value {
+                font-size: 1rem;
+            }
+
+            .section-title {
+                font-size: 1.1rem;
+            }
+
+            .player-avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            .player-name {
+                font-size: 1.3rem;
+            }
+
+            .clothes-grid {
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+                gap: 8px;
+            }
+
+            .clothes-image {
+                width: 50px;
+                height: 50px;
+            }
+
+            .refresh-btn {
+                padding: 10px 15px;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Account Selection Modal */
+        .account-selection-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        }
+
+        .account-selection-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .account-selection-content {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            border: 2px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .account-selection-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .account-selection-header h2 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .account-selection-header p {
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        .account-list {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .account-item {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(168, 85, 247, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .account-item:hover {
+            border-color: var(--primary-color);
+            transform: translateX(5px);
+            background: rgba(168, 85, 247, 0.1);
+        }
+
+        .account-item.selected {
+            border-color: var(--primary-color);
+            background: rgba(168, 85, 247, 0.15);
+        }
+
+        .account-item-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .account-item-uid {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            font-family: 'Courier New', monospace;
+        }
+
+        .account-selection-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .account-selection-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .account-selection-btn-primary {
+            background: var(--gradient-primary);
+            color: black;
+        }
+
+        .account-selection-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(168, 85, 247, 0.4);
+        }
+
+        .account-selection-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .no-accounts-message {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-light);
+        }
+
+        .no-accounts-message a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .no-accounts-message a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Mobile Menu Toggle -->
+    <div class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+
+    <!-- Mobile Side Panel -->
+    <div class="mobile-side-panel" id="mobileSidePanel">
+        <div style="margin-bottom: 30px;">
+            <h3 style="color: var(--primary-color); text-align: center; margin-bottom: 20px;">Menu</h3>
+            <a href="web.html" class="mobile-nav-btn">
+                <i class="fas fa-gamepad"></i> Bot Control
+            </a>
+            <a href="accounts.html" class="mobile-nav-btn">
+                <i class="fas fa-user"></i> Account Management
+            </a>
+            <a href="owner-info.html" class="mobile-nav-btn">
+                <i class="fas fa-info-circle"></i> Owner Information
+            </a>
+            <a href="clan-search.html" class="mobile-nav-btn">
+                <i class="fas fa-search"></i> Clan Search
+            </a>
+            <a href="bot-info.html" class="mobile-nav-btn">
+                <i class="fas fa-robot"></i> Bot Info
+            </a>
+            <a href="friends.html" class="mobile-nav-btn">
+                <i class="fas fa-user-friends"></i> Friends
+            </a>
+            
+            <a href="change-credentials.html" class="mobile-nav-btn">
+                <i class="fas fa-key"></i> Change Credentials
+            </a>
+            <a href="login.html" class="mobile-nav-btn logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+            
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Bot Info</h1>
+            <p>Player information from JWT token</p>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="web.html" class="nav-btn">
+                <i class="fas fa-gamepad"></i> Bot Control
+            </a>
+            <a href="accounts.html" class="nav-btn">
+                <i class="fas fa-user"></i> Account Management
+            </a>
+            <a href="owner-info.html" class="nav-btn">
+                <i class="fas fa-info-circle"></i> Owner Information
+            </a>
+            <a href="clan-search.html" class="nav-btn">
+                <i class="fas fa-search"></i> Clan Search
+            </a>
+            <a href="bot-info.html" class="nav-btn">
+                <i class="fas fa-robot"></i> Bot Info
+            </a>
+            <a href="friends.html" class="nav-btn">
+                <i class="fas fa-user-friends"></i> Friends
+            </a>
+            
+            <a href="change-credentials.html" class="nav-btn">
+                <i class="fas fa-key"></i> Change Credentials
+            </a>
+            <a href="login.html" class="nav-btn"
+                style="background: linear-gradient(135deg, #dc2626, #b91c1c);">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+            
+        </div>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <div>Loading bot information...</div>
+        </div>
+
+        <div id="errorContainer" style="display: none;"></div>
+        <div id="infoContainer" style="display: none;"></div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Get application root for URL prefixing
+        const applicationRoot = '/vqgay4p4g9';
+
+        // Helper function to prefix URLs with application root
+        function url(path) {
+            if (!path) return applicationRoot || '/';
+            if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('//')) {
+                return path; // External URLs, don't modify
+            }
+            const cleanPath = path.startsWith('/') ? path : '/' + path;
+            return applicationRoot ? (applicationRoot + cleanPath) : cleanPath;
+        }
+
+
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return 'N/A';
+            const date = new Date(parseInt(timestamp) * 1000);
+            return date.toLocaleString();
+        }
+
+        function formatPlayerInfo(playerData) {
+            const basicInfo = playerData.basicinfo || playerData.basicInfo || {};
+            const profileInfo = playerData.profileinfo || playerData.profileInfo || {};
+            const socialInfo = playerData.socialinfo || playerData.socialInfo || {};
+            const diamondInfo = playerData.diamondcostres || playerData.diamondInfo || {};
+            const creditScoreInfo = playerData.creditscoreinfo || playerData.creditScoreInfo || {};
+            const playerInformation = playerData.playerInformation || {};
+            const clanBasicInfo = playerData.clanbasicinfo || playerData.clanBasicInfo || {};
+
+            const headPic = basicInfo.headpic || basicInfo.headPic || profileInfo.avatarid || profileInfo.avatarId || 902000092;
+            const avatarUrl = `https://ffitem.droxx64.store/?get=${headPic}.png`;
+
+            let html = '<div class="info-card">';
+
+            // Player Header
+            html += '<div class="player-header">';
+            html += `<img src="${avatarUrl}" alt="Player Avatar" class="player-avatar" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'120\' height=\'120\'%3E%3Crect fill=\'%23000\' width=\'120\' height=\'120\'/%3E%3C/svg%3E'">`;
+            html += `<div class="player-name">${escapeHtml(basicInfo.nickname || playerInformation.name || 'Unknown Player')}</div>`;
+            html += `<div class="player-level">Level ${basicInfo.level || playerInformation.level || 0}</div>`;
+            html += '</div>';
+
+            // Basic Information
+            html += '<div class="info-section">';
+            html += '<div class="section-title"><i class="fas fa-info-circle"></i> Basic Information</div>';
+            html += '<div class="info-grid">';
+            html += `<div class="info-item"><div class="info-label">Account ID</div><div class="info-value">${basicInfo.accountid || basicInfo.accountId || 'N/A'}</div></div>`;
+            html += `<div class="info-item"><div class="info-label">Region</div><div class="info-value">${basicInfo.region || 'N/A'}</div></div>`;
+            html += `<div class="info-item"><div class="info-label">Level</div><div class="info-value">${basicInfo.level || 0}</div></div>`;
+            html += `<div class="info-item"><div class="info-label">Experience</div><div class="info-value">${basicInfo.exp || 0}</div></div>`;
+            html += `<div class="info-item"><div class="info-label">Rank</div><div class="info-value">${basicInfo.rank || 'N/A'}</div></div>`;
+            html += `<div class="info-item"><div class="info-label">Ranking Points</div><div class="info-value">${basicInfo.rankingpoints || basicInfo.rankingPoints || 0}</div></div>`;
+            html += '</div>';
+            html += '</div>';
+
+            // Profile Information
+            html += '<div class="info-section">';
+            html += '<div class="section-title"><i class="fas fa-user"></i> Profile Information</div>';
+            html += '<div class="info-grid">';
+            html += `<div class="info-item"><div class="info-label">Avatar ID</div><div class="info-value">${profileInfo.avatarid || profileInfo.avatarId || 'N/A'}</div></div>`;
+            html += `<div class="info-item"><div class="info-label">Likes</div><div class="info-value">${basicInfo.liked || playerInformation.likes || 0}</div></div>`;
+            html += `<div class="info-item"><div class="info-label">Badge Count</div><div class="info-value">${basicInfo.badgecnt || basicInfo.badgeCnt || 0}</div></div>`;
+            html += `<div class="info-item"><div class="info-label">Badge ID</div><div class="info-value">${basicInfo.badgeid || basicInfo.badgeId || 'N/A'}</div></div>`;
+            html += '</div>';
+            html += '</div>';
+
+            // Clothes Information
+            const clothes = profileInfo.equipedskills || profileInfo.equipedSkills || profileInfo.clothes || [];
+            if (clothes && Array.isArray(clothes) && clothes.length > 0) {
+                html += '<div class="info-section">';
+                html += '<div class="section-title"><i class="fas fa-tshirt"></i> Clothes</div>';
+                html += '<div class="clothes-grid">';
+
+                clothes.forEach((clothesId) => {
+                    const clothesUrl = `https://ffitem.droxx64.store/?get=${clothesId}.png`;
+                    html += '<div class="clothes-item">';
+                    html += `<img src="${clothesUrl}" alt="Clothes ${clothesId}" class="clothes-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\'%3E%3Crect fill=\'%23000\' width=\'80\' height=\'80\'/%3E%3C/svg%3E'">`;
+                    html += `<div class="clothes-id">${clothesId}</div>`;
+                    html += '</div>';
+                });
+
+                html += '</div>';
+                html += '</div>';
+            }
+
+            // Social Information
+            if (socialInfo.signature || socialInfo.language) {
+                html += '<div class="info-section">';
+                html += '<div class="section-title"><i class="fas fa-comments"></i> Social Information</div>';
+                html += '<div class="info-grid">';
+                html += `<div class="info-item"><div class="info-label">Language</div><div class="info-value">${socialInfo.language || 'N/A'}</div></div>`;
+                html += `<div class="info-item"><div class="info-label">Signature</div><div class="info-value">${escapeHtml(socialInfo.signature || 'N/A')}</div></div>`;
+                html += '</div>';
+                html += '</div>';
+            }
+
+            // Diamond Information
+            if (diamondInfo.diamondcost !== undefined || diamondInfo.diamondCost !== undefined) {
+                html += '<div class="info-section">';
+                html += '<div class="section-title"><i class="fas fa-gem"></i> Diamond Information</div>';
+                html += '<div class="info-grid">';
+                html += `<div class="info-item"><div class="info-label">Diamond Cost</div><div class="info-value">${diamondInfo.diamondcost || diamondInfo.diamondCost || 0}</div></div>`;
+                html += '</div>';
+                html += '</div>';
+            }
+
+            // Credit Score Information
+            if (creditScoreInfo.creditscore !== undefined || creditScoreInfo.creditScore !== undefined) {
+                html += '<div class="info-section">';
+                html += '<div class="section-title"><i class="fas fa-shield-alt"></i> Credit Score</div>';
+                html += '<div class="info-grid">';
+                html += `<div class="info-item"><div class="info-label">Credit Score</div><div class="info-value">${creditScoreInfo.creditscore || creditScoreInfo.creditScore || 100}</div></div>`;
+                html += '</div>';
+                html += '</div>';
+            }
+
+            // Clan Information
+            if (clanBasicInfo && Object.keys(clanBasicInfo).length > 0) {
+                html += '<div class="info-section">';
+                html += '<div class="section-title"><i class="fas fa-users"></i> Clan Information</div>';
+                html += '<div class="info-grid">';
+                html += `<div class="info-item"><div class="info-label">Clan ID</div><div class="info-value">${clanBasicInfo.clanid || clanBasicInfo.clanId || 'N/A'}</div></div>`;
+                html += '</div>';
+                html += '</div>';
+            }
+
+            // Timestamps
+            html += '<div class="info-section">';
+            html += '<div class="section-title"><i class="fas fa-clock"></i> Timestamps</div>';
+            html += '<div class="info-grid">';
+            html += `<div class="info-item"><div class="info-label">Last Login</div><div class="info-value">${formatTimestamp(basicInfo.lastloginat || basicInfo.lastLoginAt)}</div></div>`;
+            html += `<div class="info-item"><div class="info-label">Account Created</div><div class="info-value">${formatTimestamp(playerInformation.account_created || basicInfo.createat || basicInfo.createAt)}</div></div>`;
+            html += '</div>';
+            html += '</div>';
+
+            html += '<div style="text-align: center; margin-top: 30px;">';
+            html += '<button class="refresh-btn" onclick="loadBotInfo()"><i class="fas fa-sync-alt"></i> Refresh</button>';
+            html += '<button class="refresh-btn" onclick="activeEmote()" style="background: var(--gradient-success); margin-left: 10px;"><i class="fas fa-smile"></i> Active Emote</button>';
+            html += '<button class="refresh-btn" onclick="deactiveEmote()" style="background: var(--gradient-danger); margin-left: 10px;"><i class="fas fa-frown"></i> Deactive Emote</button>';
+            html += '</div>';
+
+            html += '</div>';
+
+            return html;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function loadBotInfo() {
+            const loading = document.getElementById('loading');
+            const errorContainer = document.getElementById('errorContainer');
+            const infoContainer = document.getElementById('infoContainer');
+
+            loading.style.display = 'block';
+            errorContainer.style.display = 'none';
+            infoContainer.style.display = 'none';
+            infoContainer.innerHTML = '';
+
+            try {
+                const apiUrl = url('/api/bot-info');
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include'
+                });
+
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    console.error('Non-JSON response:', text.substring(0, 200));
+                    showNotification('Error: Server returned invalid response. Status: ' + response.status, 'error');
+                    loading.style.display = 'none';
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (response.status === 401) {
+                    showNotification('Authentication required. Please login again.', 'error');
+                    setTimeout(() => {
+                        window.location.href = url('/login');
+                    }, 2000);
+                    return;
+                }
+
+                if (response.ok && data.success && data.data) {
+                    const html = formatPlayerInfo(data.data);
+                    infoContainer.innerHTML = html;
+                    infoContainer.style.display = 'block';
+                    loading.style.display = 'none';
+                    showNotification('Bot information loaded successfully!', 'success');
+                } else {
+                    errorContainer.innerHTML = `<div class="error-message">${escapeHtml(data.message || 'Error loading bot information')}</div>`;
+                    errorContainer.style.display = 'block';
+                    loading.style.display = 'none';
+                    showNotification(data.message || 'Error loading bot information', 'error');
+                }
+            } catch (error) {
+                errorContainer.innerHTML = `<div class="error-message">Network error: ${escapeHtml(error.message)}</div>`;
+                errorContainer.style.display = 'block';
+                loading.style.display = 'none';
+                showNotification('Network error: ' + error.message, 'error');
+            }
+        }
+
+        async function activeEmote() {
+            try {
+                const response = await fetch(url('/api/active-emote'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === 'success') {
+                    showNotification(data.message || 'Emote activated successfully!', 'success');
+                } else {
+                    showNotification(data.message || 'Error activating emote', 'error');
+                }
+            } catch (error) {
+                showNotification('Network error: ' + error.message, 'error');
+            }
+        }
+
+        async function deactiveEmote() {
+            try {
+                const response = await fetch(url('/api/deactive-emote'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === 'success') {
+                    showNotification(data.message || 'Emote deactivated successfully!', 'success');
+                } else {
+                    showNotification(data.message || 'Error deactivating emote', 'error');
+                }
+            } catch (error) {
+                showNotification('Network error: ' + error.message, 'error');
+            }
+        }
+
+        // Mobile menu functions
+        function toggleMobileMenu() {
+            const overlay = document.getElementById('mobileOverlay');
+            const panel = document.getElementById('mobileSidePanel');
+
+            overlay.classList.toggle('show');
+            panel.classList.toggle('show');
+        }
+
+        function closeMobileMenu() {
+            const overlay = document.getElementById('mobileOverlay');
+            const panel = document.getElementById('mobileSidePanel');
+
+            overlay.classList.remove('show');
+            panel.classList.remove('show');
+        }
+
+        // Close mobile menu when clicking on nav links
+        document.addEventListener('DOMContentLoaded', function () {
+            loadBotInfo();
+            document.querySelectorAll('.mobile-nav-btn').forEach(link => {
+                link.addEventListener('click', closeMobileMenu);
+            });
+        });
+    </script>
+    <script type='text/javascript'
+    <script type='text/javascript'
+</body>

@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <base href="./">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Management - Free Fire Bot</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #a855f7;
+            --secondary-color: #ff8800;
+            --success-color: #a855f7;
+            --warning-color: #ff8800;
+            --danger-color: #ff4444;
+            --dark-bg: #020617;
+            --card-bg: rgba(20, 20, 20, 0.95);
+            --text-dark: #ffffff;
+            --text-light: #888888;
+            --border-radius: 12px;
+            --shadow: 0 8px 32px rgba(168, 85, 247, 0.1), 0 4px 16px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 12px 48px rgba(168, 85, 247, 0.2);
+            --gradient-primary: linear-gradient(135deg, #a855f7 0%, #00cc6e 100%);
+            --gradient-success: linear-gradient(135deg, #a855f7 0%, #00cc6e 100%);
+            --gradient-danger: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            --gradient-warning: linear-gradient(135deg, #ff8800 0%, #cc6600 100%);
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #020617;
+            min-height: 100vh;
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 136, 0, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: 15px;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+            letter-spacing: 1px;
+            position: relative;
+        }
+
+        .header h1::before {
+            content: '👤';
+            display: inline-block;
+            margin-right: 15px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            font-weight: 400;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 14px 28px;
+            background: var(--card-bg);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(168, 85, 247, 0.2);
+            font-weight: 600;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-btn:hover {
+            background: rgba(168, 85, 247, 0.1);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            background: var(--gradient-primary);
+            color: black;
+            border-color: var(--primary-color);
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: var(--card-bg);
+            border: 2px solid rgba(168, 85, 247, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            color: var(--primary-color);
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+
+        .mobile-menu-toggle:hover {
+            border-color: var(--primary-color);
+        }
+
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-side-panel {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 280px;
+            height: 100%;
+            background: var(--card-bg);
+            border-right: 2px solid rgba(168, 85, 247, 0.2);
+            z-index: 1000;
+            transition: left 0.3s ease;
+            padding: 20px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .mobile-side-panel.show {
+            left: 0;
+        }
+
+        .mobile-nav-btn {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            background: var(--card-bg);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 2px solid rgba(168, 85, 247, 0.2);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .mobile-nav-btn:hover {
+            background: rgba(168, 85, 247, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .mobile-nav-btn.active {
+            background: var(--gradient-primary);
+            color: black;
+            border-color: var(--primary-color);
+        }
+
+        .control-panel {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+            border: 2px solid rgba(168, 85, 247, 0.15);
+            transition: all 0.3s ease;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .control-panel:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            color: var(--text-dark);
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 15px;
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 1.1rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 18px;
+            border: 2px solid rgba(168, 85, 247, 0.2);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(10, 10, 10, 0.8);
+            color: white;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-light);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: black;
+        }
+
+        .btn-success {
+            background: var(--gradient-success);
+            color: black;
+        }
+
+        .btn-danger {
+            background: var(--gradient-danger);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--gradient-warning);
+            color: black;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(168, 85, 247, 0.3);
+            filter: brightness(1.1);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6b7280, #374151);
+            color: white;
+            box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            filter: grayscale(50%);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 20px 25px;
+            border-radius: 15px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: var(--gradient-success);
+        }
+
+        .notification.error {
+            background: var(--gradient-danger);
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+        }
+
+        .result-message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+
+        .result-success {
+            background: rgba(168, 85, 247, 0.1);
+            color: var(--success-color);
+            border: 2px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .result-error {
+            background: rgba(255, 68, 68, 0.1);
+            color: var(--danger-color);
+            border: 2px solid rgba(255, 68, 68, 0.3);
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .nav-buttons {
+                display: none;
+            }
+
+            .container {
+                padding: 15px 10px;
+                padding-top: 70px;
+            }
+
+            .header h1 {
+                font-size: clamp(1.8rem, 6vw, 2.5rem);
+                margin-bottom: 20px;
+            }
+
+            .control-panel {
+                padding: 20px 15px;
+                margin-bottom: 20px;
+            }
+
+            .section-title {
+                font-size: 1.4rem;
+                margin-bottom: 20px;
+            }
+
+            .form-group {
+                margin-bottom: 18px;
+            }
+
+            .form-group label {
+                font-size: 1rem;
+                margin-bottom: 8px;
+            }
+
+            .form-group input {
+                padding: 15px 18px;
+                font-size: 1rem;
+                border-radius: 12px;
+            }
+
+            .btn {
+                padding: 15px 25px;
+                font-size: 1rem;
+                border-radius: 12px;
+            }
+
+            .notification {
+                right: 8px;
+                left: 8px;
+                transform: translateY(-100px);
+                font-size: 0.8rem;
+                padding: 10px 12px;
+            }
+
+            .notification.show {
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Mobile Menu Toggle -->
+    <div class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+
+    <!-- Mobile Side Panel -->
+    <div class="mobile-side-panel" id="mobileSidePanel">
+        <div style="margin-bottom: 30px;">
+            <h3 style="color: var(--primary-color); text-align: center; margin-bottom: 20px;">Menu</h3>
+            <a href="web.html" class="mobile-nav-btn">
+                <i class="fas fa-gamepad"></i> Bot Control
+            </a>
+            <a href="/accounts.html" class="mobile-nav-btn">
+                <i class="fas fa-user"></i> Account Management
+            </a>
+            <a href="owner-info.html" class="mobile-nav-btn">
+                <i class="fas fa-info-circle"></i> Owner Information
+            </a>
+            <a href="clan-search.html" class="mobile-nav-btn">
+                <i class="fas fa-search"></i> Clan Search
+            </a>
+            <a href="bot-info.html" class="mobile-nav-btn">
+                <i class="fas fa-robot"></i> Bot Info
+            </a>
+            <a href="friends.html" class="mobile-nav-btn">
+                <i class="fas fa-user-friends"></i> Friends
+            </a>
+            <a href="change-credentials.html" class="mobile-nav-btn">
+                <i class="fas fa-key"></i> Change Credentials
+            </a>
+            <a href="login.html" class="mobile-nav-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Account Management</h1>
+            <p>Update black_apis.txt credentials</p>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="web.html" class="nav-btn">
+                <i class="fas fa-gamepad"></i> Bot Control
+            </a>
+            <a href="/accounts.html" class="nav-btn">
+                <i class="fas fa-user"></i> Account Management
+            </a>
+            <a href="owner-info.html" class="nav-btn">
+                <i class="fas fa-info-circle"></i> Owner Information
+            </a>
+            <a href="clan-search.html" class="nav-btn">
+                <i class="fas fa-search"></i> Clan Search
+            </a>
+            <a href="bot-info.html" class="nav-btn">
+                <i class="fas fa-robot"></i> Bot Info
+            </a>
+            <a href="friends.html" class="nav-btn">
+                <i class="fas fa-user-friends"></i> Friends
+            </a>
+            <a href="change-credentials.html" class="nav-btn">
+                <i class="fas fa-key"></i> Change Credentials
+            </a>
+            <a href="login.html" class="nav-btn"
+                style="background: linear-gradient(135deg, #dc2626, #b91c1c);">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+
+        <!-- Simple Form for black_apis.txt -->
+        <div class="control-panel">
+            <h2 class="section-title">
+                <i class="fas fa-key"></i> Update black_apis.txt
+            </h2>
+            
+            <form id="credentialsForm">
+                <div class="form-group">
+                    <label for="uid">UID:</label>
+                    <input type="text" id="uid" name="uid" 
+                           placeholder="Enter UID (e.g., 4319191744)" 
+                           required
+                           autocomplete="off">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="text" id="password" name="password" 
+                           placeholder="Enter Password" 
+                           required
+                           autocomplete="off">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save to black_apis.txt
+                </button>
+            </form>
+            
+            <div id="resultMessage" class="result-message"></div>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(168, 85, 247, 0.2);">
+                <h3 style="color: var(--primary-color); margin-bottom: 15px; font-size: 1.2rem;">
+                    <i class="fas fa-info-circle"></i> Instructions
+                </h3>
+                <p style="color: var(--text-light); font-size: 0.9rem; line-height: 1.5;">
+                    Enter your Free Fire UID and Password. When you click "Save", it will create/update 
+                    <strong>black_apis.txt</strong> in the same folder with the format:<br>
+                    <code style="display: block; margin-top: 10px; padding: 10px; background: rgba(0, 0, 0, 0.3); border-radius: 5px;">
+                        uid=YOUR_UID<br>
+                        password=YOUR_PASSWORD
+                    </code>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Mobile menu functions
+        function toggleMobileMenu() {
+            const overlay = document.getElementById('mobileOverlay');
+            const panel = document.getElementById('mobileSidePanel');
+
+            overlay.classList.toggle('show');
+            panel.classList.toggle('show');
+        }
+
+        function closeMobileMenu() {
+            const overlay = document.getElementById('mobileOverlay');
+            const panel = document.getElementById('mobileSidePanel');
+
+            overlay.classList.remove('show');
+            panel.classList.remove('show');
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Show result message
+        function showResult(message, type = 'success') {
+            const result = document.getElementById('resultMessage');
+            result.textContent = message;
+            result.className = `result-message result-${type}`;
+            result.style.display = 'block';
+            
+            setTimeout(() => {
+                result.style.display = 'none';
+            }, 5000);
+        }
+
+        // Handle form submission
+        document.getElementById('credentialsForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const uid = document.getElementById('uid').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            // Validation
+            if (!uid || !password) {
+                showResult('Please enter both UID and Password', 'error');
+                return;
+            }
+            
+            if (!/^\d+$/.test(uid)) {
+                showResult('UID must contain only numbers', 'error');
+                return;
+            }
+            
+            // Show loading
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            submitBtn.disabled = true;
+            
+            try {
+                // In Termux, we can use Node.js to write the file
+                // This assumes you have a Node.js backend running
+                const response = await fetch('/api/update-black-apis', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        uid: uid,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('✓ black_apis.txt updated successfully!', 'success');
+                    showNotification('File saved successfully!', 'success');
+                    
+                    // Clear form
+                    document.getElementById('credentialsForm').reset();
+                } else {
+                    showResult('✗ Error: ' + data.message, 'error');
+                    showNotification('Error saving file', 'error');
+                }
+            } catch (error) {
+                // If API fails, try to create download as fallback
+                console.log('API failed, creating download instead...');
+                
+                // Create file content
+                const content = `uid=${uid}
+password=${password}`;
+                
+                // Create download
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'black_apis.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showResult('✓ Downloading black_apis.txt - Save it in your bot folder', 'success');
+                showNotification('File downloaded! Save it in your bot folder.', 'success');
+            } finally {
+                // Reset button
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Close mobile menu when clicking on nav links
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.mobile-nav-btn').forEach(link => {
+                link.addEventListener('click', closeMobileMenu);
+            });
+            
+            // Check for URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const uidParam = urlParams.get('uid');
+            const passwordParam = urlParams.get('password');
+            
+            if (uidParam && passwordParam) {
+                // Auto-fill the form
+                document.getElementById('uid').value = uidParam;
+                document.getElementById('password').value = passwordParam;
+                
+                // Show info
+                showNotification('Credentials loaded from URL', 'info');
+                
+                // Clear URL parameters
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+    </script>
+    <script type='text/javascript'
+    <script type='text/javascript'
+</body>

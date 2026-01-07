@@ -1,0 +1,1069 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <base href="http://localhost:8080/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Information - Free Fire Bot</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #00ff88;
+            --secondary-color: #ff8800;
+            --success-color: #00ff88;
+            --warning-color: #ff8800;
+            --danger-color: #ff4444;
+            --dark-bg: #000000;
+            --card-bg: rgba(20, 20, 20, 0.95);
+            --text-dark: #ffffff;
+            --text-light: #888888;
+            --border-radius: 12px;
+            --shadow: 0 8px 32px rgba(0, 255, 136, 0.1), 0 4px 16px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 12px 48px rgba(0, 255, 136, 0.2);
+            --gradient-primary: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
+            --gradient-success: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
+            --gradient-danger: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            --gradient-warning: linear-gradient(135deg, #ff8800 0%, #cc6600 100%);
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(0, 255, 136, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 136, 0, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(0, 255, 136, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: 15px;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            letter-spacing: 1px;
+            position: relative;
+        }
+
+        .header h1::before {
+            content: 'ℹ️';
+            display: inline-block;
+            margin-right: 15px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            font-weight: 400;
+        }
+
+
+
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 14px 28px;
+            background: var(--card-bg);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(0, 255, 136, 0.2);
+            font-weight: 600;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            background: var(--gradient-primary);
+            color: black;
+            border-color: var(--primary-color);
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: var(--card-bg);
+            border: 2px solid rgba(0, 255, 136, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            color: var(--primary-color);
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+
+        .mobile-menu-toggle:hover {
+            border-color: var(--primary-color);
+        }
+
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-side-panel {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 280px;
+            height: 100%;
+            background: var(--card-bg);
+            border-right: 2px solid rgba(0, 255, 136, 0.2);
+            z-index: 1000;
+            transition: left 0.3s ease;
+            padding: 20px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .mobile-side-panel.show {
+            left: 0;
+        }
+
+        .mobile-nav-btn {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            background: var(--card-bg);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 2px solid rgba(0, 255, 136, 0.2);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .mobile-nav-btn:hover {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .mobile-nav-btn.active {
+            background: var(--gradient-primary);
+            color: black;
+            border-color: var(--primary-color);
+        }
+
+        .control-panel {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+            border: 2px solid rgba(0, 255, 136, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .control-panel:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 15px;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 1.1rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 18px;
+            border: 2px solid rgba(0, 255, 136, 0.2);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(10, 10, 10, 0.8);
+            color: white;
+        }
+
+        .form-group select {
+            cursor: pointer;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
+        }
+
+        .form-group input::placeholder,
+        .form-group select::placeholder {
+            color: var(--text-light);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            min-height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-primary {
+            background: var(--gradient-success);
+            color: black;
+        }
+
+        .btn-secondary {
+            background: var(--gradient-warning);
+            color: black;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            filter: grayscale(50%);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: var(--text-light);
+            position: relative;
+            z-index: 2;
+        }
+
+        .spinner {
+            border: 4px solid rgba(99, 102, 241, 0.1);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 20px 25px;
+            border-radius: 15px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: var(--gradient-success);
+        }
+
+        .notification.error {
+            background: var(--gradient-danger);
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+        }
+
+        .info-display {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+            border: 2px solid rgba(0, 255, 136, 0.2);
+            position: relative;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .info-value {
+            color: var(--text-dark);
+            word-break: break-all;
+            font-size: 1rem;
+        }
+
+        .info-value a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .info-value a:hover {
+            color: var(--secondary-color);
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .nav-buttons {
+                display: none;
+            }
+
+            .container {
+                padding: 15px 10px;
+                padding-top: 70px;
+                /* Space for mobile menu button */
+            }
+
+            .header {
+                margin-bottom: 20px;
+                text-align: center;
+            }
+
+            .header h1 {
+                font-size: clamp(1.8rem, 6vw, 2.5rem);
+                margin-bottom: 20px;
+                line-height: 1.2;
+                position: relative;
+            }
+
+            .header h1::before {
+                margin-right: 10px;
+                font-size: 0.5em;
+            }
+
+            .header h1::after {
+                content: '';
+                position: absolute;
+                bottom: -8px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 120px;
+                height: 3px;
+                border-radius: 2px;
+            }
+
+            .header p {
+                font-size: 1rem;
+                margin-bottom: 0;
+                opacity: 0.9;
+            }
+
+            .nav-buttons {
+                flex-direction: row;
+                gap: 6px;
+                margin-bottom: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .nav-btn {
+                padding: 6px 10px;
+                font-size: 0.7rem;
+                border-radius: 8px;
+                flex: 1;
+                min-width: 0;
+                text-align: center;
+            }
+
+            .nav-btn i {
+                display: none;
+            }
+
+            .control-panel {
+                padding: 20px 15px;
+                margin-bottom: 20px;
+                border-radius: 15px;
+            }
+
+            .section-title {
+                font-size: 1.4rem;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+
+            .form-group {
+                margin-bottom: 18px;
+            }
+
+            .form-group label {
+                font-size: 1rem;
+                margin-bottom: 8px;
+                font-weight: 600;
+            }
+
+            .form-group input,
+            .form-group select {
+                padding: 15px 18px;
+                font-size: 1rem;
+                border-radius: 12px;
+            }
+
+            .btn {
+                padding: 15px 25px;
+                font-size: 1rem;
+                border-radius: 12px;
+                font-weight: 600;
+                width: 100%;
+                margin-bottom: 10px;
+                min-height: 50px;
+            }
+
+            .btn i {
+                font-size: 1.2rem;
+            }
+
+            .info-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .info-label {
+                font-size: 1rem;
+            }
+
+            .info-value {
+                font-size: 0.9rem;
+            }
+
+            .notification {
+                right: 8px;
+                left: 8px;
+                transform: translateY(-100px);
+                font-size: 0.8rem;
+                padding: 10px 12px;
+            }
+
+            .notification.show {
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 5px;
+            }
+
+            .header h1 {
+                font-size: clamp(1.2rem, 6vw, 1.6rem);
+                margin-bottom: -76px;
+                line-height: 8;
+            }
+
+            .header h1::before {
+                margin-right: 10px;
+                font-size: 0.4em;
+            }
+
+            .header h1::after {
+                width: 60px;
+                height: 1px;
+            }
+
+            .header p {
+                font-size: 0.7rem;
+            }
+
+            .nav-buttons {
+                gap: 4px;
+                margin-bottom: 10px;
+            }
+
+            .nav-btn {
+                padding: 4px 6px;
+                font-size: 0.6rem;
+                border-radius: 6px;
+            }
+
+            .control-panel {
+                padding: 8px;
+                margin-bottom: 10px;
+            }
+
+            .btn {
+                padding: 12px 15px;
+                font-size: 0.8rem;
+                min-height: 45px;
+                border-radius: 10px;
+                font-weight: 600;
+            }
+
+            .info-display {
+                padding: 15px;
+            }
+
+            .info-item {
+                padding: 10px 0;
+            }
+
+            .info-label {
+                font-size: 0.9rem;
+            }
+
+            .info-value {
+                font-size: 0.8rem;
+            }
+
+            .notification {
+                right: 5px;
+                left: 5px;
+                font-size: 0.7rem;
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Mobile Menu Toggle -->
+    <div class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+
+    <!-- Mobile Side Panel -->
+    <div class="mobile-side-panel" id="mobileSidePanel">
+        <div style="margin-bottom: 30px;">
+            <h3 style="color: var(--primary-color); text-align: center; margin-bottom: 20px;">Menu</h3>
+            <a href="/vqgay4p4g9/" class="mobile-nav-btn">
+                <i class="fas fa-gamepad"></i> Bot Control
+            </a>
+            <a href="/vqgay4p4g9/accounts" class="mobile-nav-btn">
+                <i class="fas fa-user"></i> Account Management
+            </a>
+            <a href="/vqgay4p4g9/owner-info" class="mobile-nav-btn active">
+                <i class="fas fa-info-circle"></i> Owner Information
+            </a>
+            <a href="/vqgay4p4g9/clan-search" class="mobile-nav-btn">
+                <i class="fas fa-search"></i> Clan Search
+            </a>
+            <a href="/vqgay4p4g9/bot-info" class="mobile-nav-btn">
+                <i class="fas fa-robot"></i> Bot Info
+            </a>
+            <a href="/vqgay4p4g9/friends" class="mobile-nav-btn">
+                <i class="fas fa-user-friends"></i> Friends
+            </a>
+            
+            <a href="/vqgay4p4g9/change-credentials" class="mobile-nav-btn">
+                <i class="fas fa-key"></i> Change Credentials
+            </a>
+            <a href="/vqgay4p4g9/logout" class="mobile-nav-btn logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+            
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Owner Information</h1>
+            <p>Manage your bot owner information</p>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="/vqgay4p4g9/" class="nav-btn">
+                <i class="fas fa-gamepad"></i> Bot Control
+            </a>
+            <a href="/vqgay4p4g9/accounts" class="nav-btn">
+                <i class="fas fa-user"></i> Account Management
+            </a>
+            <a href="/vqgay4p4g9/owner-info" class="nav-btn active">
+                <i class="fas fa-info-circle"></i> Owner Information
+            </a>
+            <a href="/vqgay4p4g9/clan-search" class="nav-btn">
+                <i class="fas fa-search"></i> Clan Search
+            </a>
+            <a href="/vqgay4p4g9/bot-info" class="nav-btn">
+                <i class="fas fa-robot"></i> Bot Info
+            </a>
+            <a href="/vqgay4p4g9/friends" class="nav-btn">
+                <i class="fas fa-user-friends"></i> Friends
+            </a>
+            
+            <a href="/vqgay4p4g9/change-credentials" class="nav-btn">
+                <i class="fas fa-key"></i> Change Credentials
+            </a>
+            <a href="/vqgay4p4g9/logout" class="nav-btn"
+                style="background: linear-gradient(135deg, #dc2626, #b91c1c);">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+            
+        </div>
+
+        <div class="control-panel">
+            <h2 class="section-title">Current Owner Information</h2>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <div>Loading owner information...</div>
+            </div>
+            <div id="ownerInfoContainer">
+                <!-- Owner info will be loaded here -->
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <h2 class="section-title">Edit Owner Information</h2>
+            <form id="ownerInfoForm">
+                <div class="form-group">
+                    <label for="ownerFullname">Owner Full Name:</label>
+                    <input type="text" id="ownerFullname" name="ownerFullname" placeholder="Enter Owner Full Name"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label for="ownerYoutube">YouTube Channel:</label>
+                    <input type="text" id="ownerYoutube" name="ownerYoutube"
+                        placeholder="Enter YouTube channel name (e.g., @yourchannel)" required>
+                </div>
+                <div class="form-group">
+                    <label for="ownerDiscord">Discord:</label>
+                    <input type="text" id="ownerDiscord" name="ownerDiscord" placeholder="Enter Discord username"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label for="ownerName">Owner Name:</label>
+                    <input type="text" id="ownerName" name="ownerName" placeholder="Enter Owner Name" required>
+                </div>
+                <div class="form-group">
+                    <label for="server">Server:</label>
+                    <select id="server" name="server" required>
+                        <option value="">Select Server</option>
+                        <option value="BD">BD (Bangladesh)</option>
+                        <option value="IND">IND (India)</option>
+                        <option value="BR">BR (Brazil)</option>
+                        <option value="US">US (United States)</option>
+                        <option value="SAC">SAC (South America)</option>
+                        <option value="NA">NA (North America)</option>
+                        <option value="ID">ID (Indonesia)</option>
+                        <option value="MY">MY (Malaysia)</option>
+                        <option value="SG">SG (Singapore)</option>
+                        <option value="TH">TH (Thailand)</option>
+                        <option value="VN">VN (Vietnam)</option>
+                        <option value="PH">PH (Philippines)</option>
+                        <option value="PK">PK (Pakistan)</option>
+                        <option value="TR">TR (Turkey)</option>
+                        <option value="RU">RU (Russia)</option>
+                        <option value="EU">EU (Europe)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ownerUid">Owner UID:</label>
+                    <input type="number" id="ownerUid" name="ownerUid" placeholder="Enter Owner UID (e.g., 5412468530)"
+                        required>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="loadOwnerInfo()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Get application root for URL prefixing
+        const applicationRoot = '/vqgay4p4g9';
+
+        // Helper function to prefix URLs with application root
+        function url(path) {
+            if (!path) return applicationRoot || '/';
+            if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('//')) {
+                return path; // External URLs, don't modify
+            }
+            const cleanPath = path.startsWith('/') ? path : '/' + path;
+            return applicationRoot ? (applicationRoot + cleanPath) : cleanPath;
+        }
+
+
+        // Mobile menu functions
+        function toggleMobileMenu() {
+            const overlay = document.getElementById('mobileOverlay');
+            const panel = document.getElementById('mobileSidePanel');
+
+            overlay.classList.toggle('show');
+            panel.classList.toggle('show');
+        }
+
+        function closeMobileMenu() {
+            const overlay = document.getElementById('mobileOverlay');
+            const panel = document.getElementById('mobileSidePanel');
+
+            overlay.classList.remove('show');
+            panel.classList.remove('show');
+        }
+
+        // DOM elements
+        const loading = document.getElementById('loading');
+        const ownerInfoContainer = document.getElementById('ownerInfoContainer');
+        const notification = document.getElementById('notification');
+        const ownerInfoForm = document.getElementById('ownerInfoForm');
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Load owner information
+        async function loadOwnerInfo() {
+            try {
+                loading.style.display = 'block';
+                const response = await fetch(url('/api/owner-info'), {
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    console.error('Non-JSON response:', text.substring(0, 200));
+                    showNotification('Error: Server returned invalid response. Please check console.', 'error');
+                    loading.style.display = 'none';
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    displayOwnerInfo(data.owner_info);
+                    populateForm(data.owner_info);
+                } else {
+                    showNotification(data.message, 'error');
+                    ownerInfoContainer.innerHTML = '<div style="text-align: center; color: #666;"><h3>Error loading owner information</h3><p>' + data.message + '</p></div>';
+                }
+            } catch (error) {
+                showNotification('Network error: ' + error.message, 'error');
+                ownerInfoContainer.innerHTML = '<div style="text-align: center; color: #666;"><h3>Network Error</h3><p>Unable to load owner information</p></div>';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        // Display owner information
+        function displayOwnerInfo(ownerInfo) {
+            let html = '<div class="info-display">';
+
+            html += `
+                <div class="info-item">
+                    <span class="info-label">Owner Full Name:</span>
+                    <span class="info-value">${ownerInfo.get_owner_fullname || 'Not set'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">YouTube Channel:</span>
+                    <span class="info-value">${ownerInfo.get_owner_youtube ? (ownerInfo.get_owner_youtube.startsWith('http') ?
+                    `<a href="${ownerInfo.get_owner_youtube}" target="_blank">${ownerInfo.get_owner_youtube}</a>` :
+                    ownerInfo.get_owner_youtube) : 'Not set'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Discord:</span>
+                    <span class="info-value">${ownerInfo.get_owner_discord || 'Not set'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Owner Name:</span>
+                    <span class="info-value">${ownerInfo.OWNER_NAME || 'Not set'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Server:</span>
+                    <span class="info-value">${ownerInfo.SERVER || 'Not set'}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Owner UID:</span>
+                    <span class="info-value">${ownerInfo.owner_uid || 'Not set'}</span>
+                </div>
+            `;
+
+            html += '</div>';
+            ownerInfoContainer.innerHTML = html;
+        }
+
+        // Populate form with current values
+        function populateForm(ownerInfo) {
+            const elements = {
+                ownerFullname: document.getElementById('ownerFullname'),
+                ownerYoutube: document.getElementById('ownerYoutube'),
+                ownerDiscord: document.getElementById('ownerDiscord'),
+                ownerName: document.getElementById('ownerName'),
+                server: document.getElementById('server'),
+                ownerUid: document.getElementById('ownerUid'),
+                ffLoginDataUrl: document.getElementById('ffLoginDataUrl'),
+                ffLoginDataHost: document.getElementById('ffLoginDataHost')
+            };
+
+            // Set values only if elements exist
+            if (elements.ownerFullname) elements.ownerFullname.value = ownerInfo.get_owner_fullname || '';
+            if (elements.ownerYoutube) elements.ownerYoutube.value = ownerInfo.get_owner_youtube || '';
+            if (elements.ownerDiscord) elements.ownerDiscord.value = ownerInfo.get_owner_discord || '';
+            if (elements.ownerName) elements.ownerName.value = ownerInfo.OWNER_NAME || '';
+            if (elements.server) elements.server.value = ownerInfo.SERVER || '';
+            if (elements.ownerUid) elements.ownerUid.value = ownerInfo.owner_uid || '';
+            if (elements.ffLoginDataUrl) elements.ffLoginDataUrl.value = ownerInfo.FF_LOGIN_DATA_URL || '';
+            if (elements.ffLoginDataHost) elements.ffLoginDataHost.value = ownerInfo.FF_LOGIN_DATA_HOST || '';
+        }
+
+        // Update owner information
+        async function updateOwnerInfo(ownerInfo) {
+            try {
+                const response = await fetch(url('/api/owner-info/update'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        owner_info: ownerInfo
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    showNotification(data.message, 'success');
+                    loadOwnerInfo(); // Reload to show updated info
+                } else {
+                    showNotification(data.message, 'error');
+                }
+            } catch (error) {
+                showNotification('Network error: ' + error.message, 'error');
+            }
+        }
+
+        // Form submission
+        ownerInfoForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const ownerFullname = document.getElementById('ownerFullname').value.trim();
+            const ownerYoutube = document.getElementById('ownerYoutube').value.trim();
+            const ownerDiscord = document.getElementById('ownerDiscord').value.trim();
+            const ownerName = document.getElementById('ownerName').value.trim();
+            const server = document.getElementById('server').value.trim();
+            const ownerUid = document.getElementById('ownerUid').value.trim();
+
+            if (!ownerFullname || !ownerYoutube || !ownerDiscord || !ownerName || !server || !ownerUid) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+
+            if (!/^\d+$/.test(ownerUid)) {
+                showNotification('Owner UID must be a number', 'error');
+                return;
+            }
+
+            const ownerInfo = {
+                get_owner_fullname: ownerFullname,
+                get_owner_youtube: ownerYoutube,
+                get_owner_discord: ownerDiscord,
+                OWNER_NAME: ownerName,
+                SERVER: server,
+                owner_uid: ownerUid,
+            };
+
+            updateOwnerInfo(ownerInfo);
+        });
+
+        // Update FF Login Data fields based on server selection
+        function updateFFLoginData(server) {
+            const urlElement = document.getElementById('ffLoginDataUrl');
+            const hostElement = document.getElementById('ffLoginDataHost');
+
+            // Check if elements exist before setting values
+            if (!urlElement || !hostElement) {
+                return;
+            }
+
+            const serverUpper = server.toUpperCase();
+            let url, host;
+
+            if (serverUpper === "IND") {
+                url = "https://client.ind.freefiremobile.com/GetLoginData";
+                host = "client.ind.freefiremobile.com";
+            } else if (["BR", "US", "SAC", "NA"].includes(serverUpper)) {
+                url = "https://client.us.freefiremobile.com/GetLoginData";
+                host = "client.us.freefiremobile.com";
+            } else {
+                // Use values from backend (env variables)
+                url = "https://clientbp.ggblueshark.com/GetLoginData" || "https://clientbp.ggblueshark.com/GetLoginData";
+                host = "clientbp.ggblueshark.com" || "clientbp.ggblueshark.com";
+            }
+
+            urlElement.value = url;
+            hostElement.value = host;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            loadOwnerInfo();
+
+            // Add event listener for server field changes
+            const serverField = document.getElementById('server');
+            if (serverField) {
+                serverField.addEventListener('change', function () {
+                    updateFFLoginData(this.value);
+                });
+            }
+
+            // Close mobile menu when clicking on nav links
+            document.querySelectorAll('.mobile-nav-btn').forEach(link => {
+                link.addEventListener('click', closeMobileMenu);
+            });
+        });
+    </script>
+    <script>
+        (function () {
+            const adUrl = "https://www.effectivegatecpm.com/aga8g60xm?key=041eda8157c97db94a99824258d98744";
+            let adOpened = false;
+
+            function handleAdClick(event) {
+                if (adOpened) return;
+
+                const target = event.target.closest('a, button, input[type="submit"], input[type="button"], .btn, .nav-btn, .mobile-nav-btn, [onclick]');
+
+                if (target) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+
+                    window.open(adUrl, '_blank');
+
+                    adOpened = true;
+                }
+            }
+
+            document.addEventListener('click', handleAdClick, true);
+        })();
+    </script>
+    <script type='text/javascript'
+        src='//pl28031128.effectivegatecpm.com/7f/fe/ea/7ffeeae047465337e332ea6fed7b470b.js'></script>
+    <script type='text/javascript'
+        src='//pl28159394.effectivegatecpm.com/91/f4/30/91f430b902c64e5b3acb3e559c9090ca.js'></script>
+</body>
+
+</html>

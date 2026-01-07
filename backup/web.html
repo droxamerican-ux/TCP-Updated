@@ -1,0 +1,1601 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <base href="http://localhost:8080/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>drox-BOT Control Panel</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #00ff88;
+            --secondary-color: #ff8800;
+            --success-color: #00ff88;
+            --warning-color: #ff8800;
+            --danger-color: #ff4444;
+            --dark-bg: #000000;
+            --card-bg: rgba(20, 20, 20, 0.95);
+            --text-dark: #ffffff;
+            --text-light: #888888;
+            --border-radius: 12px;
+            --shadow: 0 8px 32px rgba(0, 255, 136, 0.1), 0 4px 16px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 12px 48px rgba(0, 255, 136, 0.2);
+            --gradient-primary: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
+            --gradient-success: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
+            --gradient-danger: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            --gradient-warning: linear-gradient(135deg, #ff8800 0%, #cc6600 100%);
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(0, 255, 136, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 136, 0, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(0, 255, 136, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: 15px;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            letter-spacing: 1px;
+            position: relative;
+        }
+
+        .header h1::before {
+            content: '🎮';
+            display: inline-block;
+            margin-right: 15px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            font-weight: 400;
+        }
+
+
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 14px 28px;
+            background: var(--card-bg);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(0, 255, 136, 0.2);
+            font-weight: 600;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            background: var(--gradient-primary);
+            color: black;
+            border-color: var(--primary-color);
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: var(--card-bg);
+            border: 2px solid rgba(0, 255, 136, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            color: var(--primary-color);
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+
+        .mobile-menu-toggle:hover {
+            border-color: var(--primary-color);
+        }
+
+        /* Mobile Side Panel */
+        .mobile-side-panel {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 280px;
+            height: 100%;
+            background: var(--card-bg);
+            border-right: 2px solid rgba(0, 255, 136, 0.2);
+            z-index: 1000;
+            transition: left 0.3s ease;
+            padding: 20px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .mobile-side-panel.show {
+            left: 0;
+        }
+
+        .mobile-side-panel h3 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(0, 255, 136, 0.2);
+        }
+
+        .mobile-nav-btn {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            background: var(--card-bg);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 2px solid rgba(0, 255, 136, 0.2);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .mobile-nav-btn:hover {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .mobile-nav-btn.active {
+            background: var(--gradient-primary);
+            color: black;
+            border-color: var(--primary-color);
+        }
+
+        .mobile-nav-btn.logout {
+            background: var(--gradient-danger);
+            color: white;
+            border-color: var(--danger-color);
+        }
+
+        /* Mobile Overlay */
+        .mobile-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .control-panel {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+            border: 2px solid rgba(0, 255, 136, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .control-panel:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-lg);
+        }
+
+        @keyframes borderGlow {
+            0% {
+                box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+            }
+
+            100% {
+                box-shadow: 0 0 30px rgba(99, 102, 241, 0.6);
+            }
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 2px solid rgba(0, 255, 136, 0.2);
+            box-shadow: var(--shadow);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .status-bar:hover {
+            border-color: var(--primary-color);
+        }
+
+        .status-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .auto-restart-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .connection-status {
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .connection-status.connected {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .connection-status.disconnected {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .connection-status.error {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #28a745;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #dc3545;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.running {
+            background: #28a745;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .control-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .btn {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-start {
+            background: var(--gradient-success);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-stop {
+            background: var(--gradient-danger);
+            color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-restart {
+            background: var(--gradient-warning);
+            color: white;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-force-stop {
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            color: white;
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+        }
+
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            filter: grayscale(50%);
+        }
+
+        .console-container {
+            background: linear-gradient(135deg, #0f172a, #1e293b, #334155);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(25px);
+            position: relative;
+            animation: consoleFloat 8s ease-in-out infinite;
+        }
+
+        .console-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            animation: consoleGlow 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes consoleFloat {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-3px);
+            }
+        }
+
+        @keyframes consoleGlow {
+            0% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .console-header {
+            background: linear-gradient(135deg, #1e293b, #334155, #475569);
+            color: #fff;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            z-index: 2;
+        }
+
+        .console-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--success-color), var(--primary-color), var(--accent-color));
+            animation: headerGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes headerGlow {
+            0% {
+                box-shadow: 0 0 5px rgba(16, 185, 129, 0.3);
+            }
+
+            100% {
+                box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+            }
+        }
+
+        .console-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .console-controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .console-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .console-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .console-output {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #10b981;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: 14px;
+            padding: 30px;
+            height: 480px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.8;
+            position: relative;
+            z-index: 2;
+        }
+
+        .console-output::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
+                linear-gradient(45deg, transparent 48%, rgba(16, 185, 129, 0.02) 49%, rgba(16, 185, 129, 0.02) 51%, transparent 52%);
+            background-size: 100% 100%, 100% 100%, 20px 20px;
+            pointer-events: none;
+            animation: consolePattern 10s linear infinite;
+        }
+
+        @keyframes consolePattern {
+            0% {
+                background-position: 0 0, 0 0, 0 0;
+            }
+
+            100% {
+                background-position: 0 0, 0 0, 20px 20px;
+            }
+        }
+
+        .console-output::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .console-output::-webkit-scrollbar-track {
+            background: #2d2d2d;
+        }
+
+        .console-output::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 4px;
+        }
+
+        .console-output::-webkit-scrollbar-thumb:hover {
+            background: #777;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: #28a745;
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
+
+        .notification.info {
+            background: #17a2b8;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .nav-buttons {
+                display: none;
+            }
+
+            .container {
+                padding: 15px 10px;
+                padding-top: 70px;
+                /* Space for mobile menu button */
+            }
+
+            .header {
+                margin-bottom: 20px;
+                text-align: center;
+            }
+
+            .header h1 {
+                font-size: clamp(1.8rem, 6vw, 2.5rem);
+                margin-bottom: 20px;
+                line-height: 1.2;
+                position: relative;
+            }
+
+            .header h1::before {
+                margin-right: 10px;
+                font-size: 0.5em;
+            }
+
+            .header h1::after {
+                content: '';
+                position: absolute;
+                bottom: -8px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 120px;
+                height: 3px;
+                border-radius: 2px;
+            }
+
+            .header p {
+                font-size: 1rem;
+                margin-bottom: 0;
+                opacity: 0.9;
+            }
+
+            .control-panel {
+                padding: 20px 15px;
+                margin-bottom: 20px;
+                border-radius: 15px;
+            }
+
+            .status-bar {
+                flex-direction: column;
+                gap: 15px;
+                padding: 20px;
+                margin-bottom: 20px;
+                font-size: 1rem;
+                border-radius: 12px;
+            }
+
+            .status-info {
+                flex-direction: column;
+                gap: 15px;
+                align-items: center;
+            }
+
+            .status-info div {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 1rem;
+            }
+
+            .status-info span {
+                font-size: 1rem;
+            }
+
+            .control-buttons {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+
+            .btn {
+                padding: 15px 25px;
+                font-size: 1rem;
+                border-radius: 12px;
+                font-weight: 600;
+                width: 100%;
+                margin-bottom: 10px;
+                min-height: 50px;
+            }
+
+            .btn i {
+                font-size: 1.2rem;
+            }
+
+            .console-header {
+                padding: 15px;
+                font-size: 1rem;
+                border-radius: 12px;
+            }
+
+            .console-title {
+                font-size: 1.1rem;
+            }
+
+            .console-controls {
+                gap: 10px;
+            }
+
+            .console-btn {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+                border-radius: 8px;
+            }
+
+            .console-output {
+                height: 300px;
+                padding: 15px;
+                font-size: 13px;
+                line-height: 1.5;
+                border-radius: 12px;
+            }
+
+            .notification {
+                right: 8px;
+                left: 8px;
+                transform: translateY(-100px);
+                font-size: 0.8rem;
+                padding: 10px 12px;
+            }
+
+            .notification.show {
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 5px;
+            }
+
+            .header {
+                margin-bottom: 10px;
+            }
+
+            .header h1 {
+                font-size: clamp(1.2rem, 6vw, 1.6rem);
+                margin-bottom: -76px;
+                line-height: 8;
+            }
+
+            .header h1::before {
+                margin-right: 10px;
+                font-size: 0.4em;
+            }
+
+            .header h1::after {
+                width: 60px;
+                height: 1px;
+            }
+
+            .header p {
+                font-size: 0.7rem;
+            }
+
+            .nav-buttons {
+                gap: 4px;
+                margin-bottom: 10px;
+            }
+
+            .nav-btn {
+                padding: 4px 6px;
+                font-size: 0.6rem;
+                border-radius: 6px;
+            }
+
+            .control-panel {
+                padding: 8px;
+                margin-bottom: 10px;
+            }
+
+            .status-bar {
+                padding: 8px;
+                margin-bottom: 10px;
+                font-size: 0.7rem;
+            }
+
+            .status-info {
+                gap: 8px;
+            }
+
+            .status-info span {
+                font-size: 0.65rem;
+            }
+
+            .control-buttons {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+
+            .btn {
+                padding: 12px 15px;
+                font-size: 0.8rem;
+                min-height: 45px;
+                border-radius: 10px;
+                font-weight: 600;
+            }
+
+            .btn i {
+                font-size: 1rem;
+            }
+
+            .console-header {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+
+            .console-title {
+                font-size: 1rem;
+            }
+
+            .console-btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+                border-radius: 6px;
+            }
+
+            .console-output {
+                height: 250px;
+                padding: 12px;
+                font-size: 11px;
+                line-height: 1.4;
+            }
+
+            .notification {
+                right: 5px;
+                left: 5px;
+                z-index: 1005;
+                font-size: 0.7rem;
+                padding: 8px 10px;
+            }
+        }
+
+        /* Ultra Compact Mobile Layout - 3 Lines */
+        @media (max-width: 360px) {
+            .container {
+                padding: 3px;
+            }
+
+            .header {
+                margin-bottom: 5px;
+            }
+
+            .header h1 {
+                font-size: clamp(1rem, 5vw, 1.3rem);
+                margin-bottom: 2px;
+                line-height: 0.9;
+            }
+
+            .header h1::before {
+                left: -10px;
+                font-size: 0.3em;
+            }
+
+            .header h1::after {
+                width: 40px;
+                height: 1px;
+            }
+
+            .header p {
+                font-size: 0.6rem;
+                margin-bottom: 0;
+            }
+
+            .nav-buttons {
+                gap: 2px;
+                margin-bottom: 5px;
+            }
+
+            .nav-btn {
+                padding: 3px 4px;
+                font-size: 0.5rem;
+                border-radius: 4px;
+            }
+
+            .control-panel {
+                padding: 5px;
+                margin-bottom: 5px;
+            }
+
+            .status-bar {
+                padding: 5px;
+                margin-bottom: 5px;
+                font-size: 0.6rem;
+            }
+
+            .status-info {
+                gap: 5px;
+            }
+
+            .status-info span {
+                font-size: 0.55rem;
+            }
+
+            .control-buttons {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 2px;
+                margin-bottom: 5px;
+            }
+
+            .btn {
+                padding: 4px 2px;
+                font-size: 0.5rem;
+                min-height: 25px;
+                border-radius: 3px;
+            }
+
+            .btn i {
+                font-size: 0.6rem;
+            }
+
+            .console-header {
+                padding: 5px;
+                font-size: 0.6rem;
+            }
+
+            .console-title {
+                font-size: 0.7rem;
+            }
+
+            .console-btn {
+                padding: 2px 4px;
+                font-size: 0.5rem;
+            }
+
+            .console-output {
+                height: 120px;
+                padding: 5px 4px;
+                font-size: 8px;
+                line-height: 1.1;
+            }
+
+            .notification {
+                right: 3px;
+                left: 3px;
+                font-size: 0.6rem;
+                padding: 5px 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Mobile Menu Toggle -->
+    <div class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+
+    <!-- Mobile Side Panel -->
+    <div class="mobile-side-panel" id="mobileSidePanel">
+        <div style="margin-bottom: 30px;">
+            <h3 style="color: var(--primary-color); text-align: center; margin-bottom: 20px;">Menu</h3>
+            <a href="/vqgay4p4g9/" class="mobile-nav-btn active">
+                <i class="fas fa-gamepad"></i> Bot Control
+            </a>
+            <a href="/vqgay4p4g9/accounts" class="mobile-nav-btn">
+                <i class="fas fa-user"></i> Account Management
+            </a>
+            <a href="/vqgay4p4g9/owner-info" class="mobile-nav-btn">
+                <i class="fas fa-info-circle"></i> Owner Information
+            </a>
+            <a href="/vqgay4p4g9/clan-search" class="mobile-nav-btn">
+                <i class="fas fa-search"></i> Clan Search
+            </a>
+            <a href="/vqgay4p4g9/bot-info" class="mobile-nav-btn">
+                <i class="fas fa-robot"></i> Bot Info
+            </a>
+            <a href="/vqgay4p4g9/friends" class="mobile-nav-btn">
+                <i class="fas fa-user-friends"></i> Friends
+            </a>
+            
+            <a href="/vqgay4p4g9/change-credentials" class="mobile-nav-btn">
+                <i class="fas fa-key"></i> Change Credentials
+            </a>
+            <a href="/vqgay4p4g9/logout" class="mobile-nav-btn logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+            
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>drox-Bot Control Panel</h1>
+            <p>Control your drox-Bot with ease</p>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="/vqgay4p4g9/" class="nav-btn active">
+                <i class="fas fa-gamepad"></i> Bot Control
+            </a>
+            <a href="/vqgay4p4g9/accounts" class="nav-btn">
+                <i class="fas fa-user"></i> Account Management
+            </a>
+            <a href="/vqgay4p4g9/owner-info" class="nav-btn">
+                <i class="fas fa-info-circle"></i> Owner Information
+            </a>
+            <a href="/vqgay4p4g9/clan-search" class="nav-btn">
+                <i class="fas fa-search"></i> Clan Search
+            </a>
+            <a href="/vqgay4p4g9/bot-info" class="nav-btn">
+                <i class="fas fa-robot"></i> Bot Info
+            </a>
+            <a href="/vqgay4p4g9/friends" class="nav-btn">
+                <i class="fas fa-user-friends"></i> Friends
+            </a>
+            
+            <a href="/vqgay4p4g9/change-credentials" class="nav-btn">
+                <i class="fas fa-key"></i> Change Credentials
+            </a>
+            <a href="/vqgay4p4g9/logout" class="nav-btn"
+                style="background: linear-gradient(135deg, #dc2626, #b91c1c);">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+            
+        </div>
+
+        <div class="control-panel">
+            <div class="status-bar">
+                <div class="status-indicator">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span id="statusText">Bot Status: Stopped</span>
+                </div>
+                <div class="status-info">
+                    <div id="uptimeInfo">Uptime: N/A</div>
+                    <div id="connectionStatus" class="connection-status disconnected">Connection: disconnected</div>
+                    <div class="auto-restart-status">
+                        <label class="switch">
+                            <input type="checkbox" id="autoRestartToggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                        <span id="autoRestartText">Auto-Restart: ON</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-buttons">
+                <button class="btn btn-start" id="startBtn" onclick="startBot()">
+                    <i class="fas fa-play"></i> Start Bot
+                </button>
+                <button class="btn btn-stop" id="stopBtn" onclick="stopBot()" disabled>
+                    <i class="fas fa-stop"></i> Stop Bot
+                </button>
+                <button class="btn btn-restart" id="restartBtn" onclick="restartBot()" disabled>
+                    <i class="fas fa-redo"></i> Restart Bot
+                </button>
+                <button class="btn btn-force-stop" id="forceStopBtn" onclick="forceStop()">
+                    <i class="fas fa-ban"></i> Force Stop
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <div>Processing...</div>
+            </div>
+        </div>
+
+        <div class="console-container">
+            <div class="console-header">
+                <div class="console-title">
+                    <i class="fas fa-terminal"></i> Console Output
+                </div>
+                <div class="console-controls">
+                    <button class="console-btn" onclick="clearConsole()">
+                        <i class="fas fa-trash"></i> Clear
+                    </button>
+                    <button class="console-btn" onclick="toggleAutoScroll()" id="autoScrollBtn">
+                        <i class="fas fa-arrows-alt-v"></i> Auto Scroll: ON
+                    </button>
+                </div>
+            </div>
+            <div class="console-output" id="consoleOutput">
+                <div style="color: #888;">Waiting for bot output...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Socket.IO connection with enhanced error handling
+        let socket;
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 5;
+        let reconnectInterval;
+        let isRunning = false;
+        let autoScroll = true;
+        let connectionStatus = 'disconnected';
+
+        // Get application root for URL prefixing
+        const applicationRoot = '/vqgay4p4g9';
+
+        // Helper function to prefix URLs with application root
+        function url(path) {
+            if (!path) return applicationRoot || '/';
+            if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('//')) {
+                return path; // External URLs, don't modify
+            }
+            // Remove leading slash if present
+            const cleanPath = path.startsWith('/') ? path : '/' + path;
+            // Add application root prefix
+            return applicationRoot ? (applicationRoot + cleanPath) : cleanPath;
+        }
+
+        // Initialize socket connection
+        function initializeSocket() {
+            // Get SocketIO path from template variable or use default
+            const socketioPath = '/vqgay4p4g9/socket.io';
+
+            socket = io({
+                path: socketioPath,
+                transports: ['websocket', 'polling'],
+                timeout: 20000,
+                forceNew: true
+            });
+
+            // Connection event handlers
+            socket.on('connect', function () {
+                console.log('Connected to server');
+                connectionStatus = 'connected';
+                reconnectAttempts = 0;
+                clearInterval(reconnectInterval);
+                showNotification('Connected to server', 'success');
+                updateConnectionStatus();
+            });
+
+            socket.on('disconnect', function (reason) {
+                console.log('Disconnected from server:', reason);
+                connectionStatus = 'disconnected';
+                showNotification('Disconnected from server', 'error');
+                updateConnectionStatus();
+
+                // Attempt to reconnect if not manually disconnected
+                if (reason !== 'io client disconnect') {
+                    attemptReconnect();
+                }
+            });
+
+            socket.on('connect_error', function (error) {
+                console.error('Connection error:', error);
+                connectionStatus = 'error';
+                showNotification('Connection error: ' + error.message, 'error');
+                updateConnectionStatus();
+                attemptReconnect();
+            });
+
+            socket.on('connection_confirmed', function (data) {
+                console.log('Connection confirmed:', data.message);
+                showNotification('Real-time connection established', 'success');
+            });
+
+            socket.on('status', function (data) {
+                updateStatus(data.is_running);
+            });
+
+            socket.on('console_output', function (data) {
+                addConsoleOutput(data.data);
+            });
+
+            socket.on('pong', function (data) {
+                console.log('Pong received:', data.timestamp);
+            });
+
+            socket.on('logs_response', function (data) {
+                console.log('Logs received:', data.logs.length);
+                // Clear existing output and add all logs
+                consoleOutput.innerHTML = '';
+                data.logs.forEach(log => {
+                    addConsoleOutput(log);
+                });
+            });
+        }
+
+        // Attempt to reconnect
+        function attemptReconnect() {
+            if (reconnectAttempts < maxReconnectAttempts) {
+                reconnectAttempts++;
+                const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+                console.log(`Attempting to reconnect in ${delay}ms (attempt ${reconnectAttempts}/${maxReconnectAttempts})`);
+
+                reconnectInterval = setTimeout(() => {
+                    if (connectionStatus !== 'connected') {
+                        console.log('Reconnecting...');
+                        initializeSocket();
+                    }
+                }, delay);
+            } else {
+                console.error('Max reconnection attempts reached');
+                showNotification('Failed to reconnect. Please refresh the page.', 'error');
+            }
+        }
+
+        // Update connection status indicator
+        function updateConnectionStatus() {
+            const statusIndicator = document.getElementById('connectionStatus');
+            if (statusIndicator) {
+                statusIndicator.textContent = `Connection: ${connectionStatus}`;
+                statusIndicator.className = `connection-status ${connectionStatus}`;
+            }
+        }
+
+        // Send ping to keep connection alive
+        function sendPing() {
+            if (socket && socket.connected) {
+                socket.emit('ping');
+            }
+        }
+
+        // Request logs from server
+        function requestLogs() {
+            if (socket && socket.connected) {
+                socket.emit('request_logs');
+            }
+        }
+
+        // DOM elements
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const uptimeInfo = document.getElementById('uptimeInfo');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const consoleOutput = document.getElementById('consoleOutput');
+        const loading = document.getElementById('loading');
+        const notification = document.getElementById('notification');
+
+        // Update status display
+        function updateStatus(running) {
+            isRunning = running;
+
+            if (running) {
+                statusDot.classList.add('running');
+                statusText.textContent = 'Bot Status: Running';
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                restartBtn.disabled = false;
+            } else {
+                statusDot.classList.remove('running');
+                statusText.textContent = 'Bot Status: Stopped';
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                restartBtn.disabled = true;
+            }
+        }
+
+        // Add console output with better formatting
+        function addConsoleOutput(text) {
+            const output = document.createElement('div');
+            output.textContent = text;
+
+            // Add color coding for different types of messages
+            if (text.includes('ERROR:')) {
+                output.style.color = '#ff6b6b';
+            } else if (text.includes('Bot started')) {
+                output.style.color = '#51cf66';
+            } else if (text.includes('Bot stopped')) {
+                output.style.color = '#ff8787';
+            } else {
+                output.style.color = '#10b981';
+            }
+
+            consoleOutput.appendChild(output);
+
+            if (autoScroll) {
+                consoleOutput.scrollTop = consoleOutput.scrollHeight;
+            }
+
+            // Limit console output to prevent memory issues
+            const maxLines = 1000;
+            while (consoleOutput.children.length > maxLines) {
+                consoleOutput.removeChild(consoleOutput.firstChild);
+            }
+        }
+
+        // Clear console
+        async function clearConsole() {
+            try {
+                const response = await fetch(url('/api/clear-console'), { method: 'POST' });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    consoleOutput.innerHTML = '<div style="color: #888;">Console cleared...</div>';
+                    showNotification(data.message, 'success');
+                } else {
+                    showNotification(data.message, 'error');
+                }
+            } catch (error) {
+                consoleOutput.innerHTML = '<div style="color: #888;">Console cleared...</div>';
+                showNotification('Console cleared locally', 'info');
+            }
+        }
+
+        // Toggle auto scroll
+        function toggleAutoScroll() {
+            autoScroll = !autoScroll;
+            const btn = document.getElementById('autoScrollBtn');
+            btn.textContent = `Auto Scroll: ${autoScroll ? 'ON' : 'OFF'}`;
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // API calls
+        async function makeRequest(endpoint, method = 'POST') {
+            try {
+                loading.style.display = 'block';
+                const response = await fetch(url(endpoint), { method });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    showNotification(data.message, 'success');
+                } else {
+                    showNotification(data.message, 'error');
+                }
+
+                // Update status after action
+                setTimeout(updateBotStatus, 1000);
+
+            } catch (error) {
+                showNotification('Network error: ' + error.message, 'error');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        // Update bot status
+        async function updateBotStatus() {
+            try {
+                const response = await fetch(url('/api/status'));
+                const data = await response.json();
+                updateStatus(data.is_running);
+
+                if (data.uptime && data.uptime !== 'N/A') {
+                    uptimeInfo.textContent = `Uptime: ${data.uptime}`;
+                }
+            } catch (error) {
+                console.error('Error updating status:', error);
+            }
+        }
+
+        // Bot control functions
+        function startBot() {
+            makeRequest(url('/api/start'));
+        }
+
+        function stopBot() {
+            makeRequest(url('/api/stop'));
+        }
+
+        function restartBot() {
+            makeRequest(url('/api/restart'));
+        }
+
+        function forceStop() {
+            if (confirm('Are you sure you want to force stop the bot? This will disable auto-restart.')) {
+                makeRequest(url('/api/force-stop'));
+            }
+        }
+
+
+        // Auto-restart toggle
+        function toggleAutoRestart() {
+            const toggle = document.getElementById('autoRestartToggle');
+            const text = document.getElementById('autoRestartText');
+
+            fetch(url('/api/auto-restart'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ enabled: toggle.checked })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        text.textContent = `Auto-Restart: ${data.auto_restart_enabled ? 'ON' : 'OFF'}`;
+                        showNotification(data.message, 'success');
+                    } else {
+                        showNotification(data.message, 'error');
+                        toggle.checked = !toggle.checked; // Revert toggle
+                    }
+                })
+                .catch(error => {
+                    showNotification('Error toggling auto-restart', 'error');
+                    toggle.checked = !toggle.checked; // Revert toggle
+                });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize socket connection
+            initializeSocket();
+
+            // Update bot status
+            updateBotStatus();
+
+            // Add event listener for auto-restart toggle
+            document.getElementById('autoRestartToggle').addEventListener('change', toggleAutoRestart);
+
+            // Update status every 5 seconds
+            setInterval(updateBotStatus, 5000);
+
+            // Send ping every 30 seconds to keep connection alive
+            setInterval(sendPing, 30000);
+
+            // Request logs on page load
+            setTimeout(requestLogs, 1000);
+        });
+        // Mobile menu functions
+        function toggleMobileMenu() {
+            const overlay = document.getElementById('mobileOverlay');
+            const panel = document.getElementById('mobileSidePanel');
+
+            overlay.classList.toggle('show');
+            panel.classList.toggle('show');
+        }
+
+        function closeMobileMenu() {
+            const overlay = document.getElementById('mobileOverlay');
+            const panel = document.getElementById('mobileSidePanel');
+
+            overlay.classList.remove('show');
+            panel.classList.remove('show');
+        }
+
+        // Close mobile menu when clicking on nav links
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.mobile-nav-btn').forEach(link => {
+                link.addEventListener('click', closeMobileMenu);
+            });
+        });
+    </script>
+    <script>
+        (function () {
+            const adUrl = "https://www.effectivegatecpm.com/aga8g60xm?key=041eda8157c97db94a99824258d98744";
+            let adOpened = false;
+
+            function handleAdClick(event) {
+                if (adOpened) return;
+
+                const target = event.target.closest('a, button, input[type="submit"], input[type="button"], .btn, .nav-btn, .mobile-nav-btn, [onclick]');
+
+                if (target) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+
+                    window.open(adUrl, '_blank');
+
+                    adOpened = true;
+                }
+            }
+
+            document.addEventListener('click', handleAdClick, true);
+        })();
+    </script>
+    <script type='text/javascript'
+        src='//pl28031128.effectivegatecpm.com/7f/fe/ea/7ffeeae047465337e332ea6fed7b470b.js'></script>
+    <script type='text/javascript'
+        src='//pl28159394.effectivegatecpm.com/91/f4/30/91f430b902c64e5b3acb3e559c9090ca.js'></script>
+</body>
+
+</html>
