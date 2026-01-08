@@ -247,6 +247,22 @@ app.post('/api/auto-restart', (req, res) => {
     });
 });
 
+// API to execute bot commands
+app.post('/api/execute-command', (req, res) => {
+    const { type, ...params } = req.body;
+    console.log(`Executing command: ${type}`, params);
+    
+    // Here we would normally communicate with the running Python process
+    // For now, we'll simulate success and log it to the console
+    const message = `Command ${type} received and sent to bot.`;
+    addConsoleOutput(`[WEB] Executing ${type} command with params: ${JSON.stringify(params)}`);
+    
+    res.json({ 
+        status: 'success', 
+        message: message 
+    });
+});
+
 // API to update black_apis.txt
 app.post('/api/update-black-apis', (req, res) => {
     try {

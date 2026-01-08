@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Commands - DROX-BOT</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #a855f7;
+            --secondary-color: #7c3aed;
+            --dark-bg: #020617;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-dark: #f8fafc;
+            --text-light: #94a3b8;
+            --border-radius: 16px;
+            --shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.2);
+            --gradient-primary: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-dark);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { color: var(--primary-color); font-size: 2.5rem; margin-bottom: 10px; }
+
+        .commands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .command-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .command-card:hover { transform: translateY(-5px); border-color: var(--primary-color); }
+        .command-card h3 { color: var(--primary-color); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 5px; color: var(--text-light); font-size: 0.9rem; }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 10px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 8px;
+            color: white;
+        }
+
+        .btn-exec {
+            width: 100%;
+            padding: 10px;
+            background: var(--gradient-primary);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Navigation */
+        .nav-buttons { display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; flex-wrap: wrap; }
+        .nav-btn {
+            padding: 10px 20px;
+            background: var(--card-bg);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+        .nav-btn.active { background: var(--gradient-primary); }
+
+        /* Mobile Menu */
+        .mobile-menu-toggle { display: none; position: fixed; top: 20px; left: 20px; z-index: 1001; background: var(--card-bg); padding: 10px; border-radius: 8px; color: var(--primary-color); cursor: pointer; }
+        .mobile-side-panel { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background: var(--card-bg); z-index: 1000; transition: 0.3s; padding: 20px; }
+        .mobile-side-panel.show { left: 0; }
+        .mobile-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
+        .mobile-overlay.show { display: block; }
+
+        @media (max-width: 768px) {
+            .nav-buttons { display: none; }
+            .mobile-menu-toggle { display: block; }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-menu-toggle" id="mobileMenuToggle"><i class="fas fa-bars"></i></div>
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+    <div class="mobile-side-panel" id="mobileSidePanel">
+        <h2 style="color: var(--primary-color); margin-bottom: 20px;">Menu</h2>
+        <a href="web.html" class="nav-btn" style="display: block; margin-bottom: 10px;">Bot Control</a>
+        <a href="commands.html" class="nav-btn active" style="display: block; margin-bottom: 10px;">Commands</a>
+        <a href="accounts.html" class="nav-btn" style="display: block; margin-bottom: 10px;">Accounts</a>
+        <a href="login.html" class="nav-btn" style="display: block; margin-top: 20px; background: #ef4444;">Logout</a>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Bot Commands</h1>
+            <p>Execute advanced bot actions</p>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="web.html" class="nav-btn">Bot Control</a>
+            <a href="commands.html" class="nav-btn active">Commands</a>
+            <a href="accounts.html" class="nav-btn">Accounts</a>
+            <a href="login.html" class="nav-btn" style="background: #ef4444;">Logout</a>
+        </div>
+
+        <div class="commands-grid">
+            <!-- Spam Command -->
+            <div class="command-card">
+                <h3><i class="fas fa-bullhorn"></i> Message Spam</h3>
+                <div class="input-group">
+                    <label>Target UID / Chat ID</label>
+                    <input type="text" id="spam_id" placeholder="Enter ID">
+                </div>
+                <div class="input-group">
+                    <label>Message</label>
+                    <input type="text" id="spam_msg" placeholder="Hello!">
+                </div>
+                <div class="input-group">
+                    <label>Count</label>
+                    <input type="number" id="spam_count" value="10">
+                </div>
+                <button class="btn-exec" onclick="executeCommand('spam')">Start Spam</button>
+            </div>
+
+            <!-- Join Request -->
+            <div class="command-card">
+                <h3><i class="fas fa-user-plus"></i> Join Request</h3>
+                <div class="input-group">
+                    <label>Target UID</label>
+                    <input type="text" id="join_uid" placeholder="Enter UID">
+                </div>
+                <button class="btn-exec" onclick="executeCommand('join')">Send Request</button>
+            </div>
+
+            <!-- Evo Emote -->
+            <div class="command-card">
+                <h3><i class="fas fa-magic"></i> Evo Emote Attack</h3>
+                <div class="input-group">
+                    <label>Team Code</label>
+                    <input type="text" id="evo_team" placeholder="Enter Code">
+                </div>
+                <div class="input-group">
+                    <label>Emote ID</label>
+                    <select id="evo_id">
+                        <option value="909000063">AK Blue Flame</option>
+                        <option value="909000081">M1014 Green</option>
+                        <option value="909000075">MP40 Cobra</option>
+                    </select>
+                </div>
+                <button class="btn-exec" onclick="executeCommand('evo')">Start Attack</button>
+            </div>
+
+            <!-- Clan Info -->
+            <div class="command-card">
+                <h3><i class="fas fa-users"></i> Clan Info</h3>
+                <div class="input-group">
+                    <label>Clan ID</label>
+                    <input type="text" id="clan_id" placeholder="Enter Clan ID">
+                </div>
+                <button class="btn-exec" onclick="executeCommand('clan')">Get Info</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="fix_script.js"></script>
+    <script>
+        async function executeCommand(type) {
+            let data = { type: type };
+            if (type === 'spam') {
+                data.id = document.getElementById('spam_id').value;
+                data.msg = document.getElementById('spam_msg').value;
+                data.count = document.getElementById('spam_count').value;
+            } else if (type === 'join') {
+                data.uid = document.getElementById('join_uid').value;
+            } else if (type === 'evo') {
+                data.team = document.getElementById('evo_team').value;
+                data.emote = document.getElementById('evo_id').value;
+            } else if (type === 'clan') {
+                data.id = document.getElementById('clan_id').value;
+            }
+
+            try {
+                const response = await fetch('/api/execute-command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                alert(result.message);
+            } catch (error) {
+                alert('Error executing command');
+            }
+        }
+    </script>
+</body>
+</html>

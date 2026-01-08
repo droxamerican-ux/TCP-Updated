@@ -128,17 +128,36 @@
     <div class="login-card">
         <h1>DROX-BOT</h1>
         <p>Control Panel Login</p>
-        <form action="web.html" method="GET">
+        <form id="loginForm">
             <div class="input-group">
-                <label><i class="fas fa-user"></i> Username</label>
-                <input type="text" placeholder="Enter username" required>
+                <label><i class="fas fa-user"></i> Email</label>
+                <input type="email" id="email" placeholder="admin@drox.com" required>
             </div>
             <div class="input-group">
                 <label><i class="fas fa-lock"></i> Password</label>
-                <input type="password" placeholder="Enter password" required>
+                <input type="password" id="password" placeholder="Enter password" required>
+            </div>
+            <div id="errorMessage" style="color: #ef4444; font-size: 0.8rem; margin-bottom: 15px; display: none;">
+                Invalid email or password
             </div>
             <button type="submit" class="login-btn">Login</button>
         </form>
+
+        <script>
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const errorMsg = document.getElementById('errorMessage');
+
+                if (email === 'admin@drox.com' && password === 'drox71') {
+                    localStorage.setItem('isLoggedIn', 'true');
+                    window.location.href = 'web.html';
+                } else {
+                    errorMsg.style.display = 'block';
+                }
+            });
+        </script>
         <div class="footer-text">
             Developed by <strong>drox</strong>
         </div>

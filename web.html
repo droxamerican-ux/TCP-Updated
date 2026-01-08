@@ -1521,7 +1521,6 @@
 }
 
         // Mobile Menu Logic
-        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
         const mobileSidePanel = document.getElementById('mobileSidePanel');
         const mobileOverlay = document.getElementById('mobileOverlay');
 
@@ -1530,7 +1529,6 @@
             mobileOverlay.classList.toggle('show');
         }
 
-        if (mobileMenuToggle) mobileMenuToggle.addEventListener('click', toggleMobileMenu);
         if (mobileOverlay) mobileOverlay.addEventListener('click', toggleMobileMenu);
 
         // Initialize
@@ -1565,4 +1563,5 @@
     </script>
     <script type='text/javascript'
     <script type='text/javascript'
+<script src='fix_script.js'></script>
 </body>
