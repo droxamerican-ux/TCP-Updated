@@ -1,12 +1,8 @@
 requests
-httpx
-google
-protobuf
-pycryptodome
 psutil
-PyJWT
-urllib3
-protobuf-decoder
+pyjwt
 pytz
 aiohttp
 cfonts
+pycryptodome
+protobuf==3.20.3
